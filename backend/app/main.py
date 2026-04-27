@@ -25,12 +25,13 @@ app = FastAPI(
     title=settings.PROJECT_NAME,
     version=settings.VERSION,
     description="AI-powered recruiter evaluation dashboard API",
-    docs_url="/docs",
-    redoc_url="/redoc",
+    docs_url="/ananya-aegis/docs",
+    redoc_url="/ananya-aegis/redoc",
+    openapi_url="/ananya-aegis/openapi.json",
 )
 
 # ─────────────────────────────────────────────
-# CORS — allow all origins and regions
+# CORS — allow all origins
 # ─────────────────────────────────────────────
 app.add_middleware(
     CORSMiddleware,
@@ -53,19 +54,22 @@ app.include_router(analytics.router)
 
 
 # ─────────────────────────────────────────────
-# Root & Health
+# Root & Health  (works with or without prefix stripping)
 # ─────────────────────────────────────────────
 @app.get("/", tags=["Root"])
+@app.get("/ananya-aegis", tags=["Root"])
+@app.get("/ananya-aegis/", tags=["Root"])
 def root():
     return {
         "project": settings.PROJECT_NAME,
         "version": settings.VERSION,
-        "docs": "/docs",
-        "health": "/health",
+        "docs": "/ananya-aegis/docs",
+        "health": "/ananya-aegis/health",
     }
 
 
 @app.get("/health", tags=["Root"])
+@app.get("/ananya-aegis/health", tags=["Root"])
 def health():
     return {
         "status": "ok",

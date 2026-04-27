@@ -19,22 +19,28 @@ async function request(path, options = {}) {
 }
 
 export const api = {
-  getCandidates: () => request("/ananya-ageis/candidates?limit=500"),
-  getAssessments: () => request("/ananya-ageis/assessments?limit=500"),
-  getInterviews: () => request("/ananya-ageis/interviews?limit=500"),
-  getAgentOutputs: () => request("/ananya-ageis/agent-output?limit=500"),
-  getFinalDecisions: () => request("/ananya-ageis/final-decisions?limit=500"),
-  getDashboardSummary: () => request("/ananya-ageis/dashboard/summary"),
-  getDecisionPie: () => request("/ananya-ageis/charts/decision-pie"),
-  getInterviewStatus: () => request("/ananya-ageis/charts/interview-status"),
-  getDepartmentBar: () => request("/ananya-ageis/charts/department-bar"),
+  getCandidates: () => request("/ananya-aegis/candidates?limit=500"),
+  getAssessments: () => request("/ananya-aegis/assessments?limit=500"),
+  getInterviews: () => request("/ananya-aegis/interviews?limit=500"),
+  getAgentOutputs: () => request("/ananya-aegis/agent-output?limit=500"),
+  getFinalDecisions: () => request("/ananya-aegis/final-decisions?limit=500"),
+  getDashboardSummary: () => request("/ananya-aegis/dashboard/summary"),
+  getDecisionPie: () => request("/ananya-aegis/charts/decision-pie"),
+  getInterviewStatus: () => request("/ananya-aegis/charts/interview-status"),
+  getDepartmentBar: () => request("/ananya-aegis/charts/department-bar"),
+  getHiringFunnel: (dateFrom, dateTo) => {
+    const p = new URLSearchParams();
+    if (dateFrom) p.append("date_from", dateFrom);
+    if (dateTo)   p.append("date_to",   dateTo);
+    return request(`/ananya-aegis/charts/hiring-funnel?${p}`);
+  },
   updateFinalDecision: (candidateId, payload) =>
-    request(`/ananya-ageis/final-decisions/${candidateId}`, {
+    request(`/ananya-aegis/final-decisions/${candidateId}`, {
       method: "PUT",
       body: JSON.stringify(payload),
     }),
   createFeedback: (payload) =>
-    request("/ananya-ageis/hr-feedback", {
+    request("/ananya-aegis/hr-feedback", {
       method: "POST",
       body: JSON.stringify(payload),
     }),

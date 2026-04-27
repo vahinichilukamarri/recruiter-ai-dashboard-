@@ -5,7 +5,7 @@ from app.database import get_db
 from app.models import Interview
 from app.schemas import InterviewOut
 
-router = APIRouter(prefix="/ananya-ageis/interviews", tags=["Interviews"])
+router = APIRouter(prefix="/ananya-aegis/interviews", tags=["Interviews"])
 
 
 def _filter_by_status(db: Session, status_val: str) -> list[Interview]:

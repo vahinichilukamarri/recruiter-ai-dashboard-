@@ -1,7 +1,8 @@
 from collections import defaultdict
 from datetime import datetime, timedelta
+from typing import Optional
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
@@ -11,6 +12,7 @@ from app.models import AgentOutput, Assessment, Candidate, FinalDecision, Interv
 from app.schemas import (
     ChartItem,
     DashboardSummary,
+    HiringFunnelItem,
     ScoreDistributionItem,
     WeeklyTrendItem,
 )
@@ -22,7 +24,7 @@ router = APIRouter(tags=["Analytics"])
 # Dashboard Summary
 # ─────────────────────────────────────────────
 
-@router.get("/ananya-ageis/dashboard/summary", response_model=DashboardSummary)
+@router.get("/ananya-aegis/dashboard/summary", response_model=DashboardSummary)
 def dashboard_summary(db: Session = Depends(get_db)):
     total_candidates = db.query(func.count(Candidate.id)).scalar() or 0
 
@@ -58,10 +60,82 @@ def dashboard_summary(db: Session = Depends(get_db)):
 
 
 # ─────────────────────────────────────────────
+# Chart: Hiring Funnel
+# ─────────────────────────────────────────────
+
+@router.get("/ananya-aegis/charts/hiring-funnel", response_model=list[HiringFunnelItem])
+def chart_hiring_funnel(
+    date_from: Optional[str] = Query(None, description="Start date YYYY-MM-DD"),
+    date_to:   Optional[str] = Query(None, description="End date YYYY-MM-DD"),
+    db: Session = Depends(get_db),
+):
+    dt_from = datetime.fromisoformat(date_from) if date_from else None
+    dt_to   = datetime.fromisoformat(date_to)   if date_to   else None
+
+    # Stage 1 — Applications (candidates in date window)
+    cq = db.query(Candidate)
+    if dt_from:
+        cq = cq.filter(Candidate.created_at >= dt_from)
+    if dt_to:
+        cq = cq.filter(Candidate.created_at <= dt_to)
+    total = cq.count()
+
+    if total == 0:
+        return []
+
+    cand_ids = [row.id for row in cq.with_entities(Candidate.id).all()]
+
+    def pct(val: int, base: int) -> float:
+        return round(val / base * 100, 1) if base else 0.0
+
+    # Stage 2 — AI Screened (distinct candidates with an assessment)
+    screened = (
+        db.query(func.count(func.distinct(Assessment.candidate_id)))
+        .filter(Assessment.candidate_id.in_(cand_ids))
+        .scalar() or 0
+    )
+
+    # Stage 3 — Avatar Interviewed (distinct candidates with an interview)
+    interviewed = (
+        db.query(func.count(func.distinct(Interview.candidate_id)))
+        .filter(Interview.candidate_id.in_(cand_ids))
+        .scalar() or 0
+    )
+
+    # Stage 4 — Escalated to Final Round
+    escalated = (
+        db.query(func.count(Interview.id))
+        .filter(
+            Interview.candidate_id.in_(cand_ids),
+            Interview.status == "Escalated",
+        )
+        .scalar() or 0
+    )
+
+    # Stage 5 — Selected / Hired
+    selected = (
+        db.query(func.count(FinalDecision.id))
+        .filter(
+            FinalDecision.candidate_id.in_(cand_ids),
+            FinalDecision.final_decision == "Selected",
+        )
+        .scalar() or 0
+    )
+
+    return [
+        HiringFunnelItem(stage="Applications Received", count=total,       percentage=100.0),
+        HiringFunnelItem(stage="AI Screened (Passed)",  count=screened,    percentage=pct(screened,    total)),
+        HiringFunnelItem(stage="Avatar Interviewed",    count=interviewed, percentage=pct(interviewed, screened)),
+        HiringFunnelItem(stage="Escalated to Final",    count=escalated,   percentage=pct(escalated,   interviewed)),
+        HiringFunnelItem(stage="Selected / Hired",      count=selected,    percentage=pct(selected,    escalated)),
+    ]
+
+
+# ─────────────────────────────────────────────
 # Chart: Decision Pie
 # ─────────────────────────────────────────────
 
-@router.get("/ananya-ageis/charts/decision-pie", response_model=list[ChartItem])
+@router.get("/ananya-aegis/charts/decision-pie", response_model=list[ChartItem])
 def chart_decision_pie(db: Session = Depends(get_db)):
     rows = (
         db.query(FinalDecision.final_decision, func.count(FinalDecision.id))
@@ -78,7 +152,7 @@ def chart_decision_pie(db: Session = Depends(get_db)):
 # Chart: Interview Status
 # ─────────────────────────────────────────────
 
-@router.get("/ananya-ageis/charts/interview-status", response_model=list[ChartItem])
+@router.get("/ananya-aegis/charts/interview-status", response_model=list[ChartItem])
 def chart_interview_status(db: Session = Depends(get_db)):
     rows = (
         db.query(Interview.status, func.count(Interview.id))
@@ -95,7 +169,7 @@ def chart_interview_status(db: Session = Depends(get_db)):
 # Chart: Department Bar
 # ─────────────────────────────────────────────
 
-@router.get("/ananya-ageis/charts/department-bar", response_model=list[ChartItem])
+@router.get("/ananya-aegis/charts/department-bar", response_model=list[ChartItem])
 def chart_department_bar(db: Session = Depends(get_db)):
     rows = (
         db.query(Candidate.department, func.count(Candidate.id))
@@ -113,7 +187,7 @@ def chart_department_bar(db: Session = Depends(get_db)):
 # Chart: Weekly Trend
 # ─────────────────────────────────────────────
 
-@router.get("/ananya-ageis/charts/weekly-trend", response_model=list[WeeklyTrendItem])
+@router.get("/ananya-aegis/charts/weekly-trend", response_model=list[WeeklyTrendItem])
 def chart_weekly_trend(db: Session = Depends(get_db)):
     if settings.sqlalchemy_database_url.startswith("sqlite"):
         rows = db.query(Candidate.created_at).order_by(Candidate.created_at).all()
@@ -152,7 +226,7 @@ def chart_weekly_trend(db: Session = Depends(get_db)):
 # Chart: Score Distribution
 # ─────────────────────────────────────────────
 
-@router.get("/ananya-ageis/charts/score-distribution", response_model=list[ScoreDistributionItem])
+@router.get("/ananya-aegis/charts/score-distribution", response_model=list[ScoreDistributionItem])
 def chart_score_distribution(db: Session = Depends(get_db)):
     assessments = db.query(Assessment.mcq_score_percent).all()
 
@@ -188,7 +262,7 @@ def chart_score_distribution(db: Session = Depends(get_db)):
 # Chart: AI Recommendations
 # ─────────────────────────────────────────────
 
-@router.get("/ananya-ageis/charts/ai-recommendations", response_model=list[ChartItem])
+@router.get("/ananya-aegis/charts/ai-recommendations", response_model=list[ChartItem])
 def chart_ai_recommendations(db: Session = Depends(get_db)):
     rows = (
         db.query(AgentOutput.recommendation, func.count(AgentOutput.id))

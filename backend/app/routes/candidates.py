@@ -5,7 +5,7 @@ from app.database import get_db
 from app.models import Candidate
 from app.schemas import CandidateCreate, CandidateOut, CandidateUpdate, MessageResponse
 
-router = APIRouter(prefix="/ananya-ageis/candidates", tags=["Candidates"])
+router = APIRouter(prefix="/ananya-aegis/candidates", tags=["Candidates"])
 
 
 @router.get("", response_model=list[CandidateOut])

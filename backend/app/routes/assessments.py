@@ -5,7 +5,7 @@ from app.database import get_db
 from app.models import Assessment
 from app.schemas import AssessmentOut
 
-router = APIRouter(prefix="/ananya-ageis/assessments", tags=["Assessments"])
+router = APIRouter(prefix="/ananya-aegis/assessments", tags=["Assessments"])
 
 
 @router.get("", response_model=list[AssessmentOut])

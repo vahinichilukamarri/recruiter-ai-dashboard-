@@ -18,7 +18,7 @@ ARG VITE_API_BASE_URL=http://localhost:5000
 ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
 
 # Path where the SPA is mounted (matches nginx rewrite prefix)
-ARG BASE_PATH=/ananya-ageis/
+ARG BASE_PATH=/ananya-aegis/
 ENV BASE_PATH=$BASE_PATH
 
 RUN npm run build

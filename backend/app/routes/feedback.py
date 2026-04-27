@@ -5,7 +5,7 @@ from app.database import get_db
 from app.models import HRFeedback, Candidate
 from app.schemas import HRFeedbackCreate, HRFeedbackOut
 
-router = APIRouter(prefix="/ananya-ageis/hr-feedback", tags=["HR Feedback"])
+router = APIRouter(prefix="/ananya-aegis/hr-feedback", tags=["HR Feedback"])
 
 
 @router.get("", response_model=list[HRFeedbackOut])

@@ -7,7 +7,7 @@ from app.database import get_db
 from app.models import Candidate, FinalDecision
 from app.schemas import FinalDecisionOut, FinalDecisionUpdate
 
-router = APIRouter(prefix="/ananya-ageis/final-decisions", tags=["Final Decisions"])
+router = APIRouter(prefix="/ananya-aegis/final-decisions", tags=["Final Decisions"])
 
 
 def _filter_decision(db: Session, decision_val: str) -> list[FinalDecision]:

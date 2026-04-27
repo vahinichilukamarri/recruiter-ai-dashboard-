@@ -5,7 +5,7 @@ from app.database import get_db
 from app.models import AgentOutput
 from app.schemas import AgentOutputOut
 
-router = APIRouter(prefix="/ananya-ageis/agent-output", tags=["Agent Output"])
+router = APIRouter(prefix="/ananya-aegis/agent-output", tags=["Agent Output"])
 
 
 @router.get("", response_model=list[AgentOutputOut])

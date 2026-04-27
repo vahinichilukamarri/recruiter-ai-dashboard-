@@ -118,19 +118,25 @@ function StatCard({ title, value, trend, trendUp, icon: Icon, accent, accentLigh
 }
 
 /* ─── HIRING FUNNEL ─── */
-const FUNNEL = [
-  { label: "Applied",     value: 1284 },
-  { label: "Screened",    value: 890  },
-  { label: "Interviewed", value: 342  },
-  { label: "Offer",       value: 120  },
-  { label: "Hired",       value: 89   },
-];
-
 function FunnelChart() {
+  const [funnel, setFunnel] = useState([]);
   const [hovered, setHovered] = useState(null);
   const [ready, setReady] = useState(false);
-  useEffect(() => { const t = setTimeout(() => setReady(true), 350); return () => clearTimeout(t); }, []);
-  const max = FUNNEL[0].value;
+
+  useEffect(() => {
+    let alive = true;
+    api.getHiringFunnel().then(items => {
+      if (!alive) return;
+      setFunnel(items.map(item => ({ label: item.stage, value: item.count })));
+      setTimeout(() => { if (alive) setReady(true); }, 100);
+    }).catch(() => {
+      if (!alive) return;
+      setReady(true);
+    });
+    return () => { alive = false; };
+  }, []);
+
+  const max = funnel[0]?.value || 1;
 
   return (
     <div style={{
@@ -138,9 +144,19 @@ function FunnelChart() {
       padding: "24px 26px", flex: "1 1 280px", minWidth: 260,
       boxShadow: "0 1px 4px rgba(0,0,0,.06)",
     }}>
-      <div style={{ fontWeight: 700, fontSize: 15, color: T.navy0, marginBottom: 3 }}>Hiring Funnel</div>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 3 }}>
+        <div style={{ fontWeight: 700, fontSize: 15, color: T.navy0 }}>Hiring Funnel</div>
+        {funnel.length === 0 && <span style={{ fontSize: 11, color: T.navy5 }}>Loading…</span>}
+      </div>
       <div style={{ fontSize: 12, color: T.navy4, marginBottom: 20 }}>Pipeline conversion overview</div>
-      {FUNNEL.map((d, i) => {
+      {funnel.length === 0 ? (
+        [1,2,3,4,5].map(i => (
+          <div key={i} style={{ marginBottom: 14 }}>
+            <div style={{ height: 14, background: T.navy8, borderRadius: 6, marginBottom: 5, width: `${85 - i * 10}%` }} />
+            <div style={{ height: 10, background: T.navy8, borderRadius: 999 }} />
+          </div>
+        ))
+      ) : funnel.map((d, i) => {
         const pct = (d.value / max) * 100;
         const isH = hovered === i;
         return (

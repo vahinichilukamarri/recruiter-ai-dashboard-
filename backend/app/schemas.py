@@ -183,6 +183,12 @@ class ScoreDistributionItem(BaseModel):
     count: int
 
 
+class HiringFunnelItem(BaseModel):
+    stage: str
+    count: int
+    percentage: float
+
+
 # ─────────────────────────────────────────────
 # Generic
 # ─────────────────────────────────────────────

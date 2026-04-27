@@ -173,7 +173,10 @@ export default function Analytics() {
   const [rawData, setRawData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [apiError, setApiError] = useState(false);
+  const [funnelItems, setFunnelItems] = useState([]);
+  const [funnelLoading, setFunnelLoading] = useState(false);
 
+  // Fetch raw data once for KPIs + department table
   useEffect(() => {
     let alive = true;
     async function load() {
@@ -198,6 +201,29 @@ export default function Analytics() {
     load();
     return () => { alive = false; };
   }, []);
+
+  // Re-fetch funnel data from backend whenever time range changes
+  useEffect(() => {
+    let alive = true;
+    async function loadFunnel() {
+      setFunnelLoading(true);
+      try {
+        const [start, end] = getDateRange(timeRange);
+        const dateFrom = start.toISOString().split("T")[0];
+        const dateTo   = end.toISOString().split("T")[0];
+        const items = await api.getHiringFunnel(dateFrom, dateTo);
+        if (!alive) return;
+        setFunnelItems(items);
+      } catch {
+        if (!alive) return;
+        setFunnelItems([]);
+      } finally {
+        if (alive) setFunnelLoading(false);
+      }
+    }
+    loadFunnel();
+    return () => { alive = false; };
+  }, [timeRange]);
 
   const analytics = useMemo(() => {
     if (!rawData) return null;
@@ -235,7 +261,16 @@ export default function Analytics() {
     { source: "Internal Database", percentage: 12, count: 16, color: "#10B981" },
   ];
 
-  const funnelData    = analytics?.funnelData    ?? [];
+  const FUNNEL_COLORS = [T.primary, T.cyan, T.pink, "#F59E0B", T.success];
+  const funnelData = funnelItems.length > 0
+    ? funnelItems.map((item, i) => ({
+        label:      item.stage,
+        value:      item.count,
+        percentage: item.percentage,
+        color:      FUNNEL_COLORS[i] ?? T.primary,
+      }))
+    : (analytics?.funnelData ?? []);
+
   const departmentData = analytics?.curr.deptRows ?? [];
   const kpis          = analytics?.kpis;
 
@@ -319,11 +354,16 @@ export default function Analytics() {
 
             {/* Hiring Funnel */}
             <div style={{ background: T.white, borderRadius: 16, border: `1px solid ${T.navy7}`, padding: 24, boxShadow: "0 1px 3px rgba(0,0,0,.05)" }}>
-              <div style={{ marginBottom: 20 }}>
-                <h2 style={{ fontSize: 16, fontWeight: 700, color: T.navy0, marginBottom: 4 }}>Hiring Funnel</h2>
-                <p style={{ fontSize: 12, color: T.navy4 }}>Conversion at each stage for {timeRange.toLowerCase()}</p>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 20 }}>
+                <div>
+                  <h2 style={{ fontSize: 16, fontWeight: 700, color: T.navy0, marginBottom: 4 }}>Hiring Funnel</h2>
+                  <p style={{ fontSize: 12, color: T.navy4 }}>Conversion at each stage — {timeRange.toLowerCase()}</p>
+                </div>
+                {funnelLoading && (
+                  <span style={{ fontSize: 11, color: T.navy4, fontWeight: 500, padding: "3px 10px", background: T.navy8, borderRadius: 20 }}>Updating…</span>
+                )}
               </div>
-              {funnelData.length === 0 && !loading ? (
+              {funnelData.length === 0 && !funnelLoading ? (
                 <div style={{ padding: "32px 0", textAlign: "center", fontSize: 13, color: T.navy4 }}>No data for this period</div>
               ) : funnelData.map((step, i) => (
                 <FunnelStep key={i} label={step.label} value={step.value} percentage={step.percentage} color={step.color} />

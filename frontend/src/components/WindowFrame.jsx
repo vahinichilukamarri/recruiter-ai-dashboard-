@@ -123,7 +123,7 @@ export default function WindowFrame({ children }) {
             <path d="M9.5 17l-2 3.5h9l-2-3.5" fill="rgba(167,139,250,0.4)"/>
             <circle cx="12" cy="9" r="1.8" fill="#818cf8"/>
           </svg>
-          <span className="wf-title">Ananya AGEIS — Recruiter Dashboard</span>
+          <span className="wf-title">Ananya AEGIS — Recruiter Dashboard</span>
         </div>
 
         <div className="wf-controls">

@@ -6,6 +6,7 @@ import {
   Calendar, User, Briefcase, Award, X, MessageSquare, Send
 } from "lucide-react";
 import Sidebar, { T, FONT, SIDEBAR_W_EXPANDED, SIDEBAR_W_COLLAPSED } from "../components/Sidebar";
+import NotificationBell from "../components/NotificationBell";
 import { api, formatDate, mapByCandidateId } from "../services/api";
 
 // Report Card Component
@@ -681,10 +682,7 @@ export default function Reports() {
               <Download size={14} /> Export All
             </button>
             
-            <div style={{ position: "relative", cursor: "pointer" }}>
-              <Bell size={20} color={T.navy3} />
-              <div style={{ position: "absolute", top: -3, right: -3, width: 8, height: 8, borderRadius: "50%", background: T.error, border: "2px solid #fff" }} />
-            </div>
+            <NotificationBell />
             <div style={{ width: 1, height: 26, background: T.navy7 }} />
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
               <div style={{ 

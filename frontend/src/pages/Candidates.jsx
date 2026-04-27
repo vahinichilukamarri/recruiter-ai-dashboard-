@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import Sidebar, { T, FONT, SIDEBAR_W_EXPANDED, SIDEBAR_W_COLLAPSED } from "../components/Sidebar";
+import NotificationBell from "../components/NotificationBell";
 import { api, decisionForApi, formatDate, initials, mapByCandidateId, normalizeRecommendation } from "../services/api";
 import {
   Search, Filter, Plus, Download, ChevronDown,
@@ -266,6 +267,163 @@ const ReportDetailModal = ({ candidate, onClose, onExport }) => {
   );
 };
 
+function buildReportHTML(c) {
+  const scoreColor = c.score >= 85 ? '#16A34A' : c.score >= 70 ? '#D97706' : '#DC2626';
+  const recBg = c.rec === 'Proceed' ? '#DCFCE7' : c.rec === 'On Hold' ? '#FEF3C7' : '#FEE2E2';
+  const recColor = c.rec === 'Proceed' ? '#16A34A' : c.rec === 'On Hold' ? '#D97706' : '#DC2626';
+  const strengths = (c.strengths ? c.strengths.split(/[.;]\s*/).filter(Boolean).slice(0, 3) : [
+    'Strong algorithmic reasoning and complexity analysis',
+    'Clear, well-structured code with good naming',
+    'Considered edge cases and trade-offs proactively',
+  ]).map(s => `<li>${s}</li>`).join('');
+  const concerns = (c.concerns ? c.concerns.split(/[.;]\s*/).filter(Boolean).slice(0, 3) : [
+    'Could go deeper on system-design scalability trade-offs',
+  ]).map(s => `<li>${s}</li>`).join('');
+  const summary = c.summary || (c.rec === 'Proceed'
+    ? 'Proceed — strong technical fundamentals and clear problem-solving. Focus final round on system design.'
+    : c.rec === 'On Hold'
+    ? 'Hold — shows potential but needs improvement. Consider for a different role.'
+    : 'Reject — does not meet the required technical bar for this position.');
+
+  return `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Report – ${c.name}</title>
+<style>
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;margin:0;padding:32px;color:#1a1a2e}
+  h1{font-size:22px;margin:0 0 4px}
+  .sub{font-size:13px;color:#666;margin-bottom:24px}
+  .section{margin-bottom:24px}
+  .section-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#888;margin-bottom:10px}
+  .score-big{font-size:56px;font-weight:800;color:${scoreColor};line-height:1}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .card{background:#f8f8fc;border-radius:12px;padding:16px}
+  .card-label{font-size:11px;color:#888;margin-bottom:4px}
+  .card-value{font-size:20px;font-weight:700;color:#1a1a2e}
+  ul{margin:0;padding-left:20px;line-height:1.8;font-size:13px}
+  .rec-pill{display:inline-block;padding:4px 14px;border-radius:999px;font-size:12px;font-weight:600;background:${recBg};color:${recColor}}
+  .summary-box{background:#EDE9FF;border-radius:12px;padding:16px;font-size:13px;line-height:1.6}
+  @media print{body{padding:16px}}
+</style></head><body>
+<h1>${c.name}</h1>
+<div class="sub">${c.role} · ${c.id} · Interview: ${c.scheduled || '—'}</div>
+<div class="section">
+  <div class="section-title">Overall Score</div>
+  <div style="display:flex;align-items:center;gap:24px">
+    <div class="score-big">${c.score ?? '—'}</div>
+    <div>
+      <div style="margin-bottom:8px"><span class="rec-pill">${c.rec || 'Pending'}</span></div>
+      <div style="font-size:12px;color:#666">Status: <b>${c.status}</b></div>
+    </div>
+  </div>
+</div>
+<div class="section">
+  <div class="section-title">Score Breakdown</div>
+  <div class="grid">
+    <div class="card"><div class="card-label">MCQ Score</div><div class="card-value">${c.mcqScore ?? '—'}</div></div>
+    <div class="card"><div class="card-label">Communication</div><div class="card-value">${c.communicationScore ?? '—'}</div></div>
+    <div class="card"><div class="card-label">Resume Match</div><div class="card-value">${c.resumeMatch != null ? c.resumeMatch + '%' : '—'}</div></div>
+    <div class="card"><div class="card-label">Session ID</div><div class="card-value" style="font-size:14px">${c.sessionId}</div></div>
+  </div>
+</div>
+<div class="section">
+  <div class="section-title">Strengths</div>
+  <ul>${strengths}</ul>
+</div>
+<div class="section">
+  <div class="section-title">Areas to Probe in Final Round</div>
+  <ul>${concerns}</ul>
+</div>
+<div class="section">
+  <div class="section-title">AI Recommendation Summary</div>
+  <div class="summary-box">${summary}</div>
+</div>
+</body></html>`;
+}
+
+const ExportRangeModal = ({ candidates, onClose }) => {
+  const [from, setFrom] = useState(1);
+  const [to, setTo] = useState(Math.min(50, candidates.length));
+  const total = candidates.length;
+  const count = Math.max(0, Math.min(to, total) - Math.max(1, from) + 1);
+
+  const handleExport = () => {
+    const slice = candidates.slice(from - 1, to);
+    const rows = slice.map((c, i) => {
+      const scoreColor = c.score >= 85 ? '#16A34A' : c.score >= 70 ? '#D97706' : '#DC2626';
+      const recBg = c.rec === 'Proceed' ? '#DCFCE7' : c.rec === 'On Hold' ? '#FEF3C7' : '#FEE2E2';
+      const recColor = c.rec === 'Proceed' ? '#16A34A' : c.rec === 'On Hold' ? '#D97706' : '#DC2626';
+      return `<tr style="border-bottom:1px solid #e5e7eb">
+        <td style="padding:10px 14px">${from + i}</td>
+        <td style="padding:10px 14px;font-weight:600">${c.name}</td>
+        <td style="padding:10px 14px">${c.role}</td>
+        <td style="padding:10px 14px;font-family:monospace">${c.sessionId}</td>
+        <td style="padding:10px 14px;text-align:center;font-weight:700;color:${scoreColor}">${c.score ?? '—'}</td>
+        <td style="padding:10px 14px"><span style="padding:2px 10px;border-radius:999px;font-size:11px;font-weight:600;background:${recBg};color:${recColor}">${c.rec || 'Pending'}</span></td>
+        <td style="padding:10px 14px">${c.status}</td>
+      </tr>`;
+    }).join('');
+
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Candidate Export ${from}–${to}</title>
+<style>
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;margin:0;padding:32px;color:#1a1a2e}
+  h1{font-size:20px;margin:0 0 4px}
+  .sub{font-size:13px;color:#666;margin-bottom:24px}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th{padding:10px 14px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:#888;background:#f8f8fc;border-bottom:2px solid #e5e7eb}
+  @media print{body{padding:16px}}
+</style></head><body>
+<h1>Candidate Export</h1>
+<div class="sub">Records ${from}–${to} · ${count} candidates · ${new Date().toLocaleDateString()}</div>
+<table><thead><tr><th>#</th><th>Candidate</th><th>Role</th><th>Session</th><th>Score</th><th>Recommendation</th><th>Status</th></tr></thead>
+<tbody>${rows}</tbody></table>
+</body></html>`;
+
+    const win = window.open("", "_blank", "width=1000,height=700");
+    if (!win) return;
+    win.document.write(html);
+    win.document.close();
+    win.onload = () => { win.focus(); win.print(); };
+    onClose();
+  };
+
+  return (
+    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.55)", backdropFilter: "blur(4px)", zIndex: 1100, display: "flex", alignItems: "center", justifyContent: "center" }} onClick={onClose}>
+      <div style={{ background: T.white, borderRadius: 20, width: 420, padding: "28px 28px 24px", boxShadow: "0 20px 50px rgba(0,0,0,.2)", position: "relative" }} onClick={e => e.stopPropagation()}>
+        <button onClick={onClose} style={{ position: "absolute", top: 16, right: 16, background: T.navy8, border: "none", borderRadius: 8, width: 32, height: 32, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <X size={16} color={T.navy3} />
+        </button>
+        <div style={{ fontSize: 16, fontWeight: 700, color: T.navy0, marginBottom: 6 }}>Export Candidate Report</div>
+        <div style={{ fontSize: 12, color: T.navy4, marginBottom: 22 }}>
+          Choose a record range to export as PDF. Total: <b>{total}</b> candidates.
+        </div>
+        <div style={{ display: "flex", gap: 16, marginBottom: 20 }}>
+          <div style={{ flex: 1 }}>
+            <label style={{ fontSize: 11, fontWeight: 700, color: T.navy4, textTransform: "uppercase", letterSpacing: ".06em", display: "block", marginBottom: 6 }}>From</label>
+            <input type="number" min={1} max={total} value={from}
+              onChange={e => setFrom(Math.max(1, Math.min(total, Number(e.target.value))))}
+              style={{ width: "100%", padding: "8px 12px", border: `1px solid ${T.navy7}`, borderRadius: 8, fontSize: 15, fontWeight: 700, fontFamily: FONT, color: T.navy0, outline: "none", background: T.white, boxSizing: "border-box" }} />
+          </div>
+          <div style={{ flex: 1 }}>
+            <label style={{ fontSize: 11, fontWeight: 700, color: T.navy4, textTransform: "uppercase", letterSpacing: ".06em", display: "block", marginBottom: 6 }}>To</label>
+            <input type="number" min={1} max={total} value={to}
+              onChange={e => setTo(Math.max(from, Math.min(total, Number(e.target.value))))}
+              style={{ width: "100%", padding: "8px 12px", border: `1px solid ${T.navy7}`, borderRadius: 8, fontSize: 15, fontWeight: 700, fontFamily: FONT, color: T.navy0, outline: "none", background: T.white, boxSizing: "border-box" }} />
+          </div>
+        </div>
+        <div style={{ background: T.primaryLight, borderRadius: 10, padding: "10px 14px", fontSize: 12, color: T.primary, fontWeight: 600, marginBottom: 20 }}>
+          {count > 0 ? `Will export ${count} candidate${count !== 1 ? "s" : ""} (records ${from}–${Math.min(to, total)})` : "No records in this range"}
+        </div>
+        <div style={{ display: "flex", gap: 10 }}>
+          <button onClick={onClose} style={{ flex: 1, padding: "10px 0", background: T.navy8, border: `1px solid ${T.navy7}`, borderRadius: 10, fontSize: 13, fontWeight: 600, color: T.navy2, cursor: "pointer", fontFamily: FONT }}>
+            Cancel
+          </button>
+          <button onClick={handleExport} disabled={count === 0} style={{ flex: 2, padding: "10px 0", background: count === 0 ? T.navy7 : T.primary, border: "none", borderRadius: 10, fontSize: 13, fontWeight: 700, color: "#fff", cursor: count === 0 ? "not-allowed" : "pointer", fontFamily: FONT, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+            <Download size={14} /> Export {count > 0 ? `${count} Records` : ""}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 function Header({ onToggle }) {
   return (
     <header style={{ position: "sticky", top: 0, zIndex: 100, background: T.white, borderBottom: `1px solid ${T.navy7}`, padding: "13px 30px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 18, flexShrink: 0 }}>
@@ -279,10 +437,7 @@ function Header({ onToggle }) {
         </div>
       </div>
       <div style={{ display: "flex", alignItems: "center", gap: 18, flexShrink: 0 }}>
-        <div style={{ position: "relative", cursor: "pointer" }}>
-          <Bell size={20} color={T.navy3} />
-          <div style={{ position: "absolute", top: -3, right: -3, width: 8, height: 8, borderRadius: "50%", background: T.error, border: "2px solid #fff" }} />
-        </div>
+        <NotificationBell />
         <div style={{ width: 1, height: 26, background: T.navy7 }} />
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <div style={{ width: 38, height: 38, borderRadius: "50%", background: "linear-gradient(135deg,#5929D0,#CF008B)", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 700, fontSize: 14 }}>A</div>
@@ -318,6 +473,7 @@ export default function CandidatesPage() {
   const [apiError, setApiError] = useState("");
   const [showThreshold, setShowThreshold] = useState(false);
   const [thresholds, setThresholds] = useState({ score: 0, mcqScore: 0, communicationScore: 0, resumeMatch: 0 });
+  const [showExportModal, setShowExportModal] = useState(false);
   const SW = collapsed ? SIDEBAR_W_COLLAPSED : SIDEBAR_W_EXPANDED;
 
   const activeThresholdCount = Object.values(thresholds).filter(v => v > 0).length;
@@ -418,7 +574,11 @@ export default function CandidatesPage() {
   };
 
   const handleExportReport = (candidate) => {
-    alert(`Exporting report for ${candidate.name}...`);
+    const win = window.open("", "_blank", "width=900,height=700");
+    if (!win) return;
+    win.document.write(buildReportHTML(candidate));
+    win.document.close();
+    win.onload = () => { win.focus(); win.print(); };
   };
 
   const handleDecision = async (candidate, decision) => {
@@ -480,7 +640,7 @@ export default function CandidatesPage() {
                 <p style={{ fontSize: 13, color: T.navy4, marginLeft: 14 }}>ATS Interview Status Panel — all candidates across active roles</p>
               </div>
               <div style={{ display: "flex", gap: 10 }}>
-                <button style={{ display: "flex", alignItems: "center", gap: 7, background: T.white, border: `1px solid ${T.navy7}`, borderRadius: 10, padding: "9px 16px", fontSize: 13, fontWeight: 600, color: T.navy2, cursor: "pointer", fontFamily: FONT }}>
+                <button onClick={() => setShowExportModal(true)} style={{ display: "flex", alignItems: "center", gap: 7, background: T.white, border: `1px solid ${T.navy7}`, borderRadius: 10, padding: "9px 16px", fontSize: 13, fontWeight: 600, color: T.navy2, cursor: "pointer", fontFamily: FONT }}>
                   <Download size={14} /> Export
                 </button>
               </div>
@@ -766,10 +926,18 @@ export default function CandidatesPage() {
 
         {/* Report Modal */}
         {showReportModal && (
-          <ReportDetailModal 
+          <ReportDetailModal
             candidate={showReportModal}
             onClose={() => setShowReportModal(null)}
             onExport={handleExportReport}
+          />
+        )}
+
+        {/* Export Range Modal */}
+        {showExportModal && (
+          <ExportRangeModal
+            candidates={candidates}
+            onClose={() => setShowExportModal(false)}
           />
         )}
       </div>

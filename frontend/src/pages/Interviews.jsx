@@ -1,8 +1,9 @@
 // src/pages/Interviews.jsx
 import { useEffect, useMemo, useState } from "react";
-import { Calendar, Clock, Users, CheckCircle, AlertCircle, Filter, Search, Bell, Menu, ChevronRight, UserCheck, Briefcase } from "lucide-react";
+import { Calendar, Clock, Users, CheckCircle, AlertCircle, Filter, Search, Bell, ChevronLeft, ChevronRight, UserCheck, Briefcase } from "lucide-react";
 import Sidebar, { T, FONT, SIDEBAR_W_EXPANDED, SIDEBAR_W_COLLAPSED } from "../components/Sidebar";
 import { api, formatDate, mapByCandidateId } from "../services/api";
+import NotificationBell from "../components/NotificationBell";
 
 // Reusable Stat Card Component
 const StatCard = ({ title, value, trend, icon: Icon, color }) => (
@@ -130,6 +131,8 @@ const aggregateUpcomingInterviews = (rows = upcomingInterviewsData) => {
   }));
 };
 
+const ITEMS_PER_PAGE = 10;
+
 export default function Interviews() {
   const [collapsed, setCollapsed] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -139,6 +142,9 @@ export default function Interviews() {
   const [interviews, setInterviews] = useState(dummyInterviews);
   const [upcomingRows, setUpcomingRows] = useState(upcomingInterviewsData);
   const [apiError, setApiError] = useState("");
+  const [page, setPage] = useState(1);
+
+  useEffect(() => { setPage(1); }, [searchTerm, statusFilter]);
 
   useEffect(() => {
     let alive = true;
@@ -184,11 +190,14 @@ export default function Interviews() {
   }, []);
 
   const filteredInterviews = interviews.filter(interview => {
-    const matchesSearch = interview.candidate.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    const matchesSearch = interview.candidate.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          interview.id.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === "All" || interview.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
+
+  const totalPages = Math.max(1, Math.ceil(filteredInterviews.length / ITEMS_PER_PAGE));
+  const pagedInterviews = filteredInterviews.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
 
   // Get aggregated upcoming interviews
   const upcomingInterviews = useMemo(() => aggregateUpcomingInterviews(upcomingRows), [upcomingRows]);
@@ -257,10 +266,7 @@ export default function Interviews() {
           </div>
 
           <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
-            <div style={{ position: "relative", cursor: "pointer" }}>
-              <Bell size={20} color={T.navy3} />
-              <div style={{ position: "absolute", top: -3, right: -3, width: 8, height: 8, borderRadius: "50%", background: T.error, border: "2px solid #fff" }} />
-            </div>
+            <NotificationBell />
             <div style={{ width: 1, height: 26, background: T.navy7 }} />
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
               <div style={{ 
@@ -343,7 +349,7 @@ export default function Interviews() {
                 </button>
               ))}
               <div style={{ marginLeft: "auto", fontSize: 12, color: T.navy5 }}>
-                {filteredInterviews.length} sessions
+                {filteredInterviews.length === 0 ? "0 sessions" : `${(page - 1) * ITEMS_PER_PAGE + 1}–${Math.min(page * ITEMS_PER_PAGE, filteredInterviews.length)} of ${filteredInterviews.length} sessions`}
               </div>
             </div>
 
@@ -368,7 +374,7 @@ export default function Interviews() {
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredInterviews.map((interview, index) => {
+                    {pagedInterviews.map((interview, index) => {
                       const Status = STATUS_PILL[interview.status] || STATUS_PILL.Scheduled;
                       return (
                         <tr 
@@ -412,6 +418,39 @@ export default function Interviews() {
                   <Calendar size={48} color={T.navy5} style={{ marginBottom: 16 }} />
                   <div style={{ fontSize: 16, fontWeight: 600, color: T.navy0, marginBottom: 4 }}>No interviews found</div>
                   <div style={{ fontSize: 12, color: T.navy4 }}>Try adjusting your search or filter criteria</div>
+                </div>
+              )}
+
+              {/* Pagination Footer */}
+              {totalPages > 1 && (
+                <div style={{ padding: "14px 20px", borderTop: `1px solid ${T.navy7}`, display: "flex", justifyContent: "space-between", alignItems: "center", background: T.white }}>
+                  <span style={{ fontSize: 12, color: T.navy5 }}>Page {page} of {totalPages}</span>
+                  <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                    <button
+                      onClick={() => setPage(p => Math.max(1, p - 1))}
+                      disabled={page === 1}
+                      style={{ width: 32, height: 32, borderRadius: 8, border: `1px solid ${T.navy7}`, background: T.white, cursor: page === 1 ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", opacity: page === 1 ? 0.4 : 1 }}
+                    >
+                      <ChevronLeft size={14} color={T.navy3} />
+                    </button>
+                    {Array.from({ length: totalPages }, (_, i) => i + 1)
+                      .filter(p => p === 1 || p === totalPages || Math.abs(p - page) <= 1)
+                      .reduce((acc, p, idx, arr) => { if (idx > 0 && p - arr[idx - 1] > 1) acc.push("…"); acc.push(p); return acc; }, [])
+                      .map((item, idx) => item === "…" ? (
+                        <span key={`e${idx}`} style={{ width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, color: T.navy4 }}>…</span>
+                      ) : (
+                        <button key={item} onClick={() => setPage(item)} style={{ width: 32, height: 32, borderRadius: 8, border: item === page ? "none" : `1px solid ${T.navy7}`, background: item === page ? T.primary : T.white, color: item === page ? "#fff" : T.navy3, fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: FONT }}>
+                          {item}
+                        </button>
+                      ))}
+                    <button
+                      onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                      disabled={page === totalPages}
+                      style={{ width: 32, height: 32, borderRadius: 8, border: `1px solid ${T.navy7}`, background: T.white, cursor: page === totalPages ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", opacity: page === totalPages ? 0.4 : 1 }}
+                    >
+                      <ChevronRight size={14} color={T.navy3} />
+                    </button>
+                  </div>
                 </div>
               )}
             </div>

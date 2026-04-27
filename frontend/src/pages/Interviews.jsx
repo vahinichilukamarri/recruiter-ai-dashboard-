@@ -158,7 +158,8 @@ export default function Interviews() {
             candidateId: interview.candidate_id,
             candidate: candidate.full_name || `Candidate ${interview.candidate_id}`,
             role: candidate.role_applied || "Unassigned",
-            date: interview.scheduled_date || formatDate(interview.created_at),
+            scheduledDate: interview.scheduled_date || null,
+            date: formatDate(interview.scheduled_date || interview.created_at),
             time: interview.scheduled_time || "TBD",
             status: interview.status || "Scheduled",
           };
@@ -166,12 +167,12 @@ export default function Interviews() {
 
         setInterviews(mapped);
         setUpcomingRows(mapped
-          .filter(interview => interview.status === "Scheduled")
-          .map(interview => ({
-            id: interview.id,
-            role: interview.role,
-            date: interview.date,
-            candidates: [{ id: `CND-${interview.candidateId}`, name: interview.candidate, time: interview.time }],
+          .filter(iv => iv.status === "Scheduled" && iv.scheduledDate)
+          .map(iv => ({
+            id: iv.id,
+            role: iv.role,
+            date: iv.scheduledDate,
+            candidates: [{ id: `CND-${iv.candidateId}`, name: iv.candidate, time: iv.time }],
           })));
         setApiError("");
       } catch (error) {
@@ -515,15 +516,15 @@ export default function Interviews() {
                               <span style={{ fontSize: 14, fontWeight: 700, color: T.navy0 }}>{item.role}</span>
                             </div>
                             <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 8 }}>
-                              <div style={{ 
-                                display: "flex", 
-                                alignItems: "center", 
-                                gap: 4, 
-                                fontSize: 11, 
-                                color: T.navy4 
+                              <div style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 4,
+                                fontSize: 11,
+                                color: T.navy4
                               }}>
                                 <Calendar size={11} />
-                                <span>{item.date}</span>
+                                <span>{formatDate(item.date)}</span>
                               </div>
                               <div style={{ 
                                 display: "flex", 

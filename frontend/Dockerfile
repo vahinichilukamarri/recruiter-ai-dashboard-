@@ -1,4 +1,4 @@
-# Build:  docker build -t ananya-fe --build-arg VITE_API_BASE_URL=http://<your-backend-ip>:5000 .
+# Build:  docker build -t ananya-fe --build-arg VITE_API_BASE_URL=http://<your-backend-ip>:5000 --build-arg BASE_PATH=/ananya-aegis-fe/ .
 # Run:    docker run -d --name ananya-fe -p 5000:5000 ananya-fe
 #         (-p host:container is required; without it, localhost:5000 will not work.)
 
@@ -18,7 +18,7 @@ ARG VITE_API_BASE_URL=http://localhost:5000
 ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
 
 # Path where the SPA is mounted (matches nginx rewrite prefix)
-ARG BASE_PATH=/ananya-aegis/
+ARG BASE_PATH=/ananya-aegis-fe/
 ENV BASE_PATH=$BASE_PATH
 
 RUN npm run build

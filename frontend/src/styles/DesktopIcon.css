@@ -1,0 +1,421 @@
+/* src/styles/Desktop.css */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
+}
+
+/* Desktop Container */
+.desktop {
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Wallpaper */
+.wallpaper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+}
+
+.wallpaper-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+/* Desktop Icons */
+.desktop-icons-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.desktop-icon {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 80px;
+  cursor: pointer;
+  pointer-events: auto;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+  opacity: 0.85;
+}
+
+.desktop-icon.hovered {
+  transform: translateY(-2px);
+  opacity: 1;
+}
+
+.desktop-icon-image {
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(20px);
+  border-radius: 14px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  transition: all 0.15s ease;
+}
+
+.desktop-icon.hovered .desktop-icon-image {
+  background: rgba(255, 255, 255, 0.25);
+  transform: scale(1.02);
+}
+
+.desktop-icon-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: white;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(8px);
+  padding: 4px 10px;
+  border-radius: 12px;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+/* Widgets Container */
+.widgets-container {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  z-index: 2;
+  display: flex;
+  gap: 16px;
+  pointer-events: none;
+}
+
+/* Widget Base Styles */
+.widget {
+  width: 300px;
+  background: rgba(30, 30, 35, 0.85);
+  backdrop-filter: blur(40px);
+  border-radius: 20px;
+  padding: 18px 20px;
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  pointer-events: auto;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.widget:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+  background: rgba(30, 30, 35, 0.92);
+}
+
+/* Widget Header */
+.widget-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.widget-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.calendar-icon {
+  background: linear-gradient(135deg, #0A84FF, #5E5CE6);
+  box-shadow: 0 4px 12px rgba(10, 132, 255, 0.3);
+}
+
+.tasks-icon {
+  background: linear-gradient(135deg, #30B0C7, #64D2FF);
+  box-shadow: 0 4px 12px rgba(48, 176, 199, 0.3);
+}
+
+.widget-title {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 4px;
+  letter-spacing: -0.2px;
+}
+
+.widget-subtitle {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+/* Widget Divider */
+.widget-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.08);
+  margin: 12px 0;
+}
+
+/* Widget List */
+.widget-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Calendar Widget Items */
+.widget-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 12px;
+}
+
+.widget-time {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.9);
+  min-width: 95px;
+}
+
+.time-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.4);
+}
+
+.time-dot.urgent {
+  background: #FF453A;
+  box-shadow: 0 0 6px rgba(255, 69, 58, 0.6);
+}
+
+.widget-text {
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 500;
+}
+
+/* Task Tracker Items */
+.task-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.task-item:last-child {
+  border-bottom: none;
+}
+
+.task-checkbox {
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
+  border: 1.5px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.task-checkbox.checked {
+  background: #30B0C7;
+  border-color: #30B0C7;
+}
+
+.task-checkbox:hover {
+  border-color: rgba(255, 255, 255, 0.6);
+}
+
+.task-text {
+  flex: 1;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 500;
+}
+
+.task-item.completed .task-text {
+  text-decoration: line-through;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.task-priority {
+  font-size: 9px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 20px;
+  letter-spacing: 0.5px;
+  flex-shrink: 0;
+}
+
+.task-priority.high {
+  background: rgba(255, 69, 58, 0.2);
+  color: #FF453A;
+}
+
+.task-priority.medium {
+  background: rgba(255, 159, 10, 0.2);
+  color: #FF9F0A;
+}
+
+.task-priority.low {
+  background: rgba(48, 176, 199, 0.2);
+  color: #64D2FF;
+}
+
+/* Dock Container */
+.dock-container {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  pointer-events: none;
+}
+
+/* Dock */
+.dock {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  padding: 10px 16px;
+  background: rgba(30, 30, 35, 0.75);
+  backdrop-filter: blur(40px);
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  pointer-events: auto;
+}
+
+/* Dock Items */
+.dock-item {
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+.dock-item:hover {
+  transform: translateY(-8px) scale(1.05);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.dock-item.active {
+  background: rgba(48, 176, 199, 0.3);
+  box-shadow: 0 0 20px rgba(48, 176, 199, 0.4);
+}
+
+.dock-item.active::after {
+  content: '';
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  border-radius: 2px;
+  background: #30B0C7;
+}
+
+/* Dock Tooltip */
+.dock-tooltip {
+  position: absolute;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(20px);
+  color: white;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 6px 12px;
+  border-radius: 8px;
+  white-space: nowrap;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  pointer-events: none;
+  z-index: 100;
+  animation: tooltipFadeIn 0.15s ease;
+}
+
+@keyframes tooltipFadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .widgets-container {
+    top: 16px;
+    right: 16px;
+    gap: 12px;
+  }
+  
+  .widget {
+    width: 260px;
+    padding: 14px 16px;
+  }
+  
+  .dock-item {
+    width: 50px;
+    height: 50px;
+  }
+  
+  .desktop-icon {
+    width: 70px;
+  }
+  
+  .desktop-icon-image {
+    width: 48px;
+    height: 48px;
+  }
+  
+  .desktop-icon-label {
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 640px) {
+  .widgets-container {
+    display: none;
+  }
+}

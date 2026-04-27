@@ -1,0 +1,120 @@
+/* ── Shell (the window itself) ── */
+.wf-shell {
+  position: fixed;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: #0f1117;
+  /* transform keeps position:fixed children anchored to this window, not the viewport */
+  transform: translate(0, 0);
+  z-index: 10;
+  transition: border-radius 0.15s ease, box-shadow 0.15s ease;
+}
+
+/* ── Title Bar ── */
+.wf-titlebar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 36px;
+  min-height: 36px;
+  flex-shrink: 0;
+  background: #1a1d2e;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  padding: 0 0 0 14px;
+  user-select: none;
+  z-index: 9999;
+  position: relative;
+}
+
+.wf-titlebar-left {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  flex: 1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.wf-app-icon {
+  flex-shrink: 0;
+  opacity: 0.9;
+}
+
+.wf-title {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.72);
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-family: "Segoe UI", Inter, sans-serif;
+}
+
+/* ── Window Control Buttons ── */
+.wf-controls {
+  display: flex;
+  align-items: center;
+  height: 36px;
+  flex-shrink: 0;
+  pointer-events: all;
+}
+
+.wf-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 36px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.65);
+  transition: background 0.12s ease, color 0.12s ease;
+  outline: none;
+  flex-shrink: 0;
+}
+
+.wf-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.wf-btn-close:hover {
+  background: #e81123;
+  color: #ffffff;
+}
+
+/* ── Content Area ── */
+.wf-content {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  /* explicit height so position:fixed children (sidebar) can resolve height: calc(100% - 36px) */
+  height: calc(100% - 36px);
+}
+
+.wf-content > * {
+  height: 100%;
+  min-height: 0;
+}
+
+/* ── Resize Handles ── */
+.wf-resize {
+  position: absolute;
+  z-index: 99999;
+}
+
+/* edges */
+.wf-r-n  { top: 0;    left: 6px;  right: 6px;  height: 5px; cursor: n-resize;  }
+.wf-r-s  { bottom: 0; left: 6px;  right: 6px;  height: 5px; cursor: s-resize;  }
+.wf-r-e  { right: 0;  top: 6px;   bottom: 6px; width: 5px;  cursor: e-resize;  }
+.wf-r-w  { left: 0;   top: 6px;   bottom: 6px; width: 5px;  cursor: w-resize;  }
+
+/* corners — larger hit area, rendered on top of edges */
+.wf-r-ne { top: 0;    right: 0;  width: 14px; height: 14px; cursor: ne-resize; }
+.wf-r-nw { top: 0;    left: 0;   width: 14px; height: 14px; cursor: nw-resize; }
+.wf-r-se { bottom: 0; right: 0;  width: 14px; height: 14px; cursor: se-resize; }
+.wf-r-sw { bottom: 0; left: 0;   width: 14px; height: 14px; cursor: sw-resize; }

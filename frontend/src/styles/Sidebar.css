@@ -1,0 +1,87 @@
+.sidebar {
+  width: 260px;
+  min-height: 100%;
+  background: #13233d;
+  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  transition: 0.25s ease;
+  position: sticky;
+  top: 0;
+}
+
+.sidebar.collapsed {
+  width: 84px;
+}
+
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 24px 18px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.logo-box {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #5b31d6, #8b5cf6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: 700;
+  font-size: 20px;
+}
+
+.brand-wrap h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.brand-wrap p {
+  margin: 2px 0 0;
+  font-size: 13px;
+  color: rgba(255,255,255,0.65);
+}
+
+.sidebar-menu {
+  padding: 18px 10px;
+}
+
+.menu-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 14px;
+  margin-bottom: 8px;
+  border-radius: 12px;
+  cursor: pointer;
+  color: #d7deeb;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.menu-link:hover {
+  background: rgba(255,255,255,0.05);
+}
+
+.menu-link.active {
+  background: #23395f;
+  color: white;
+}
+
+.menu-icon {
+  min-width: 18px;
+}
+
+.collapse-btn {
+  margin: auto 12px 18px;
+  height: 42px;
+  border: none;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.08);
+  color: white;
+  cursor: pointer;
+}

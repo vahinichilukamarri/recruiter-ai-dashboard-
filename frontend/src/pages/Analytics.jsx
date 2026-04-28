@@ -1,7 +1,7 @@
 // src/pages/Analytics.jsx
 import { useEffect, useMemo, useState } from "react";
 import {
-  TrendingUp, TrendingDown, Users, Clock, Award, Menu, Download,
+  TrendingUp, TrendingDown, Users, Clock, Award, Download,
   Calendar, Filter, ChevronDown, Star, CheckCircle, BarChart3,
 } from "lucide-react";
 import Sidebar, { T, FONT, SIDEBAR_W_EXPANDED, SIDEBAR_W_COLLAPSED } from "../components/Sidebar";
@@ -282,9 +282,6 @@ export default function Analytics() {
         {/* Sticky Header */}
         <header style={{ position: "sticky", top: 0, zIndex: 50, background: T.white, borderBottom: `1px solid ${T.navy7}`, padding: "13px 30px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12, flex: 1 }}>
-            <button onClick={() => setCollapsed(v => !v)} style={{ background: T.navy8, border: "none", borderRadius: 8, padding: "7px 8px", cursor: "pointer" }}>
-              <Menu size={16} color={T.navy3} />
-            </button>
             {/* Time range selector */}
             <div style={{ display: "flex", alignItems: "center", gap: 10, background: T.navy8, padding: "6px 14px", borderRadius: 8 }}>
               <Calendar size={14} color={T.navy4} />

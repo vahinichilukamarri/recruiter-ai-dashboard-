@@ -1,7 +1,7 @@
 // src/pages/Reports.jsx
 import { useEffect, useState } from "react";
-import { 
-  Bell, Menu, Download, Eye, Filter, Search, ChevronDown,
+import {
+  Bell, Eye, Filter, Search, ChevronDown,
   FileText, CheckCircle, AlertCircle, Clock, Star, TrendingUp,
   Calendar, User, Briefcase, Award, X, MessageSquare, Send
 } from "lucide-react";
@@ -10,7 +10,7 @@ import NotificationBell from "../components/NotificationBell";
 import { api, formatDate, mapByCandidateId } from "../services/api";
 
 // Report Card Component
-const ReportCard = ({ report, onViewReport, onExport }) => {
+const ReportCard = ({ report, onViewReport }) => {
   const getScoreColor = (score) => {
     if (score >= 85) return T.success;
     if (score >= 70) return "#D97706";
@@ -112,42 +112,23 @@ const ReportCard = ({ report, onViewReport, onExport }) => {
             <Calendar size={10} /> {report.date}
           </span>
         </div>
-        <div style={{ display: "flex", gap: 8 }}>
-          <button 
-            onClick={(e) => { e.stopPropagation(); onExport(report); }}
-            style={{ 
-              background: T.navy8, 
-              border: "none", 
-              borderRadius: 6, 
-              padding: "5px 10px", 
-              fontSize: 11, 
-              fontWeight: 600, 
-              color: T.navy2, 
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              gap: 4
-            }}>
-            <Download size={12} /> PDF
-          </button>
-          <button 
-            onClick={(e) => { e.stopPropagation(); onViewReport(report); }}
-            style={{ 
-              background: T.primaryLight, 
-              border: "none", 
-              borderRadius: 6, 
-              padding: "5px 12px", 
-              fontSize: 11, 
-              fontWeight: 600, 
-              color: T.primary, 
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              gap: 4
-            }}>
-            <Eye size={12} /> View
-          </button>
-        </div>
+        <button
+          onClick={(e) => { e.stopPropagation(); onViewReport(report); }}
+          style={{
+            background: T.primaryLight,
+            border: "none",
+            borderRadius: 6,
+            padding: "5px 12px",
+            fontSize: 11,
+            fontWeight: 600,
+            color: T.primary,
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            gap: 4
+          }}>
+          <Eye size={12} /> View
+        </button>
       </div>
     </div>
   );
@@ -425,6 +406,8 @@ const FeedbackModal = ({ onClose, onSubmit }) => {
   );
 };
 
+const REPORTS_PAGE_SIZE = 6;
+
 export default function Reports() {
   const [collapsed, setCollapsed] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -432,6 +415,7 @@ export default function Reports() {
   const [selectedReport, setSelectedReport] = useState(null);
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [reportsData, setReportsData] = useState([]);
+  const [page, setPage] = useState(1);
 
   // Mock reports data - in real app, this would come from API
   const fallbackReports = [
@@ -532,14 +516,19 @@ export default function Reports() {
     return () => { alive = false; };
   }, []);
 
+  useEffect(() => { setPage(1); }, [searchTerm, statusFilter]);
+
   // Filter reports
   const filteredReports = reportsData.filter(report => {
-    const matchesSearch = report.candidate.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    const matchesSearch = report.candidate.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          report.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          report.role.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === "All" || report.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
+
+  const totalPages = Math.max(1, Math.ceil(filteredReports.length / REPORTS_PAGE_SIZE));
+  const pageReports = filteredReports.slice((page - 1) * REPORTS_PAGE_SIZE, page * REPORTS_PAGE_SIZE);
 
   // Stats
   const stats = {
@@ -555,14 +544,6 @@ export default function Reports() {
 
   const handleCloseModal = () => {
     setSelectedReport(null);
-  };
-
-  const handleExportReport = (report) => {
-    alert(`Exporting report for ${report.candidate}...`);
-  };
-
-  const handleBulkExport = () => {
-    alert(`Exporting all ${filteredReports.length} reports...`);
   };
 
   const handleFeedbackSubmit = async (feedbackData) => {
@@ -605,12 +586,6 @@ export default function Reports() {
           justifyContent: "space-between" 
         }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12, flex: 1 }}>
-            <button 
-              onClick={() => setCollapsed(v => !v)} 
-              style={{ background: T.navy8, border: "none", borderRadius: 8, padding: "7px 8px", cursor: "pointer" }}
-            >
-              <Menu size={16} color={T.navy3} />
-            </button>
             <div style={{ position: "relative", flex: 1, maxWidth: 340 }}>
               <Search size={14} color={T.navy5} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)" }} />
               <input 
@@ -662,24 +637,6 @@ export default function Reports() {
               }}
             >
               <MessageSquare size={14} /> Feedback
-            </button>
-            
-            <button 
-              onClick={handleBulkExport}
-              style={{ 
-                display: "flex", 
-                alignItems: "center", 
-                gap: 6, 
-                background: T.white, 
-                border: `1px solid ${T.navy7}`, 
-                borderRadius: 8, 
-                padding: "8px 14px", 
-                fontSize: 12, 
-                fontWeight: 600, 
-                color: T.navy2, 
-                cursor: "pointer" 
-              }}>
-              <Download size={14} /> Export All
             </button>
             
             <NotificationBell />
@@ -790,21 +747,95 @@ export default function Reports() {
               <FilterChip label="Completed" active={statusFilter === "Completed"} onClick={() => setStatusFilter("Completed")} />
             </div>
             <div style={{ marginLeft: "auto", fontSize: 12, color: T.navy5 }}>
-              Showing {filteredReports.length} of {reportsData.length} reports
+              Showing {(page - 1) * REPORTS_PAGE_SIZE + 1}–{Math.min(page * REPORTS_PAGE_SIZE, filteredReports.length)} of {filteredReports.length} reports
             </div>
           </div>
 
           {/* Reports Grid */}
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(420px, 1fr))", gap: 20 }}>
-            {filteredReports.map(report => (
-              <ReportCard 
+            {pageReports.map(report => (
+              <ReportCard
                 key={report.id}
                 report={report}
                 onViewReport={handleViewReport}
-                onExport={handleExportReport}
               />
             ))}
           </div>
+
+          {/* Segmented-track Pagination */}
+          {filteredReports.length > REPORTS_PAGE_SIZE && (
+            <div style={{
+              marginTop: 32,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 14,
+            }}>
+              {/* Track segments */}
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <button
+                  onClick={() => setPage(p => Math.max(1, p - 1))}
+                  disabled={page <= 1}
+                  style={{
+                    width: 36, height: 36, borderRadius: "50%",
+                    border: `1px solid ${page <= 1 ? T.navy7 : T.primary}`,
+                    background: T.white,
+                    color: page <= 1 ? T.navy6 : T.primary,
+                    cursor: page <= 1 ? "not-allowed" : "pointer",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    fontFamily: FONT, transition: "all .15s",
+                  }}
+                >
+                  ‹
+                </button>
+
+                <div style={{ display: "flex", gap: 5 }}>
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(n => (
+                    <button
+                      key={n}
+                      onClick={() => setPage(n)}
+                      title={`Page ${n}`}
+                      style={{
+                        width: n === page ? 36 : 10,
+                        height: 10,
+                        borderRadius: 999,
+                        border: "none",
+                        background: n === page
+                          ? T.primary
+                          : n < page
+                          ? T.primaryBorder
+                          : T.navy7,
+                        cursor: "pointer",
+                        transition: "all .2s cubic-bezier(.4,0,.2,1)",
+                        padding: 0,
+                      }}
+                    />
+                  ))}
+                </div>
+
+                <button
+                  onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                  disabled={page >= totalPages}
+                  style={{
+                    width: 36, height: 36, borderRadius: "50%",
+                    border: `1px solid ${page >= totalPages ? T.navy7 : T.primary}`,
+                    background: T.white,
+                    color: page >= totalPages ? T.navy6 : T.primary,
+                    cursor: page >= totalPages ? "not-allowed" : "pointer",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    fontFamily: FONT, transition: "all .15s",
+                  }}
+                >
+                  ›
+                </button>
+              </div>
+
+              <div style={{ fontSize: 12, color: T.navy4, fontWeight: 500 }}>
+                Page <strong style={{ color: T.navy1 }}>{page}</strong> of <strong style={{ color: T.navy1 }}>{totalPages}</strong>
+                &nbsp;·&nbsp; {filteredReports.length} reports
+              </div>
+            </div>
+          )}
 
           {/* Empty State */}
           {filteredReports.length === 0 && (
@@ -959,38 +990,19 @@ export default function Reports() {
               </div>
 
               {/* Action Buttons */}
-              <div style={{ display: "flex", gap: 12, paddingTop: 8, borderTop: `1px solid ${T.navy7}` }}>
-                <button 
-                  onClick={() => handleExportReport(selectedReport)}
-                  style={{ 
-                    flex: 1,
-                    background: T.primary, 
-                    border: "none", 
-                    borderRadius: 10, 
-                    padding: "10px 20px", 
-                    fontSize: 13, 
-                    fontWeight: 600, 
-                    color: "#fff", 
-                    cursor: "pointer",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: 6
-                  }}>
-                  <Download size={14} /> Download PDF Report
-                </button>
-                <button 
+              <div style={{ paddingTop: 8, borderTop: `1px solid ${T.navy7}` }}>
+                <button
                   onClick={handleCloseModal}
-                  style={{ 
-                    flex: 1,
-                    background: T.navy8, 
-                    border: "none", 
-                    borderRadius: 10, 
-                    padding: "10px 20px", 
-                    fontSize: 13, 
-                    fontWeight: 600, 
-                    color: T.navy2, 
-                    cursor: "pointer" 
+                  style={{
+                    width: "100%",
+                    background: T.navy8,
+                    border: "none",
+                    borderRadius: 10,
+                    padding: "10px 20px",
+                    fontSize: 13,
+                    fontWeight: 600,
+                    color: T.navy2,
+                    cursor: "pointer"
                   }}>
                   Close
                 </button>

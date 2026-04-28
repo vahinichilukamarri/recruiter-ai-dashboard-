@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import Sidebar, { T, FONT, SIDEBAR_W_EXPANDED, SIDEBAR_W_COLLAPSED } from "../components/Sidebar";
 import NotificationBell from "../components/NotificationBell";
-import { api, decisionForApi, formatDate, initials, mapByCandidateId, normalizeRecommendation } from "../services/api";
+import { api, formatDate, initials, mapByCandidateId, normalizeRecommendation } from "../services/api";
 import {
-  Search, Filter, Plus, Download, ChevronDown,
+  Search, Filter, Plus, Download, ChevronDown, ChevronLeft, ChevronRight,
   Clock, CheckCircle2, AlertCircle, XCircle,
-  ArrowUpRight, Eye, Mail, MoreHorizontal, Bell, Menu,
-  ThumbsUp, MinusCircle, ThumbsDown, FileText, X
+  ArrowUpRight, Eye, Mail, MoreHorizontal, Bell,
+  ThumbsUp, FileText, X
 } from "lucide-react";
 
 const STATUSES = ["All", "Scheduled", "In Progress", "Completed", "Escalated", "Rejected"];
@@ -52,30 +52,6 @@ const DECISION_LABEL = {
   Hold: "On Hold",
   Rejected: "Reject",
   Escalated: "Escalated",
-};
-
-const ACTION_CONFIG = {
-  Accept: {
-    api: "Selected",
-    icon: ThumbsUp,
-    bg: "#DCFCE7",
-    activeBg: "#16A34A",
-    color: "#16A34A",
-  },
-  "On Hold": {
-    api: "Hold",
-    icon: MinusCircle,
-    bg: "#FEF3C7",
-    activeBg: "#D97706",
-    color: "#D97706",
-  },
-  Reject: {
-    api: "Rejected",
-    icon: ThumbsDown,
-    bg: "#FEE2E2",
-    activeBg: "#DC2626",
-    color: "#DC2626",
-  },
 };
 
 // Report Detail Modal Component
@@ -424,16 +400,18 @@ const ExportRangeModal = ({ candidates, onClose }) => {
   );
 };
 
-function Header({ onToggle }) {
+function Header({ searchTerm, onSearchChange }) {
   return (
     <header style={{ position: "sticky", top: 0, zIndex: 100, background: T.white, borderBottom: `1px solid ${T.navy7}`, padding: "13px 30px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 18, flexShrink: 0 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 12, flex: 1 }}>
-        <button onClick={onToggle} style={{ background: T.navy8, border: "none", borderRadius: 8, padding: "7px 8px", cursor: "pointer", display: "flex", alignItems: "center" }}>
-          <Menu size={16} color={T.navy3} />
-        </button>
         <div style={{ position: "relative", flex: 1, maxWidth: 340 }}>
           <Search size={14} color={T.navy5} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
-          <input placeholder="Search candidates by name, role, ID..." style={{ width: "100%", paddingLeft: 36, paddingRight: 14, paddingTop: 9, paddingBottom: 9, border: `1px solid ${T.navy7}`, borderRadius: 10, fontSize: 13, fontFamily: FONT, color: T.navy2, background: T.navy8, outline: "none" }} />
+          <input
+            placeholder="Search candidates by name, role, ID..."
+            value={searchTerm}
+            onChange={e => onSearchChange(e.target.value)}
+            style={{ width: "100%", paddingLeft: 36, paddingRight: 14, paddingTop: 9, paddingBottom: 9, border: `1px solid ${T.navy7}`, borderRadius: 10, fontSize: 13, fontFamily: FONT, color: T.navy2, background: T.navy8, outline: "none" }}
+          />
         </div>
       </div>
       <div style={{ display: "flex", alignItems: "center", gap: 18, flexShrink: 0 }}>
@@ -461,14 +439,16 @@ function StatPill({ label, count, color, bg }) {
   );
 }
 
+const PAGE_SIZE = 10;
+
 export default function CandidatesPage() {
   const [collapsed, setCollapsed] = useState(false);
   const [activeStatus, setActiveStatus] = useState("All");
   const [activeRole, setActiveRole] = useState("All Roles");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [page, setPage] = useState(1);
   const [hRow, setHRow] = useState(null);
   const [showReportModal, setShowReportModal] = useState(null);
-  const [decisionMade, setDecisionMade] = useState({});
-  const [savingDecision, setSavingDecision] = useState({});
   const [candidates, setCandidates] = useState(CANDIDATES);
   const [apiError, setApiError] = useState("");
   const [showThreshold, setShowThreshold] = useState(false);
@@ -477,6 +457,8 @@ export default function CandidatesPage() {
   const SW = collapsed ? SIDEBAR_W_COLLAPSED : SIDEBAR_W_EXPANDED;
 
   const activeThresholdCount = Object.values(thresholds).filter(v => v > 0).length;
+
+  useEffect(() => { setPage(1); }, [activeStatus, activeRole, searchTerm, thresholds]);
 
   useEffect(() => {
     let alive = true;
@@ -534,12 +516,6 @@ export default function CandidatesPage() {
         });
 
         setCandidates(mapped);
-        setDecisionMade(mapped.reduce((acc, candidate) => {
-          if (candidate.finalDecision) {
-            acc[candidate.id] = DECISION_LABEL[candidate.finalDecision] || candidate.finalDecision;
-          }
-          return acc;
-        }, {}));
         setApiError("");
       } catch (error) {
         setApiError("Backend is not reachable yet. Showing sample data until it starts.");
@@ -552,6 +528,8 @@ export default function CandidatesPage() {
   const roles = useMemo(() => ["All Roles", ...new Set(candidates.map(c => c.role).filter(Boolean))], [candidates]);
 
   const filtered = candidates.filter(c => {
+    const q = searchTerm.trim().toLowerCase();
+    if (q && !c.name?.toLowerCase().includes(q) && !c.id?.toLowerCase().includes(q) && !c.role?.toLowerCase().includes(q)) return false;
     if (activeStatus !== "All" && c.status !== activeStatus) return false;
     if (activeRole !== "All Roles" && c.role !== activeRole) return false;
     for (const { key } of THRESHOLD_FIELDS) {
@@ -560,6 +538,9 @@ export default function CandidatesPage() {
     }
     return true;
   });
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const pageRows = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   const counts = {
     Scheduled:   candidates.filter(c => c.status === "Scheduled").length,
@@ -581,52 +562,12 @@ export default function CandidatesPage() {
     win.onload = () => { win.focus(); win.print(); };
   };
 
-  const handleDecision = async (candidate, decision) => {
-    const candidateId = candidate.candidateId || Number(String(candidate.id).replace("C-", ""));
-    const finalDecision = ACTION_CONFIG[decision]?.api || decisionForApi(decision);
-    setSavingDecision(prev => ({ ...prev, [candidate.id]: true }));
-    setApiError("");
-
-    try {
-      const saved = await api.updateFinalDecision(candidateId, {
-        final_decision: finalDecision,
-        decision_notes: `Recruiter marked ${decision} from the candidates dashboard.`,
-      });
-      const savedDecision = saved.final_decision || finalDecision;
-
-      setDecisionMade(prev => ({
-        ...prev,
-        [candidate.id]: DECISION_LABEL[savedDecision] || decision,
-      }));
-      setCandidates(prev => prev.map(row => {
-        if (row.id !== candidate.id) return row;
-        return {
-          ...row,
-          finalDecision: savedDecision,
-          status: savedDecision === "Rejected" ? "Rejected" : row.status === "Rejected" ? "Completed" : row.status,
-        };
-      }));
-      setShowReportModal(current => {
-        if (!current || current.id !== candidate.id) return current;
-        return {
-          ...current,
-          finalDecision: savedDecision,
-          status: savedDecision === "Rejected" ? "Rejected" : current.status === "Rejected" ? "Completed" : current.status,
-        };
-      });
-    } catch (error) {
-      setApiError(error.message);
-    } finally {
-      setSavingDecision(prev => ({ ...prev, [candidate.id]: false }));
-    }
-  };
-
   return (
     <>
       <div style={{ display: "flex", height: "100%", overflow: "hidden", fontFamily: FONT, background: T.bg }}>
         <Sidebar collapsed={collapsed} onToggle={() => setCollapsed(v => !v)} activeKey="candidates" />
         <div style={{ marginLeft: SW, flex: 1, height: "100vh", overflowY: "auto", overflowX: "hidden", display: "flex", flexDirection: "column", transition: "margin-left .25s cubic-bezier(.4,0,.2,1)" }}>
-          <Header onToggle={() => setCollapsed(v => !v)} />
+          <Header searchTerm={searchTerm} onSearchChange={setSearchTerm} />
 
           <main style={{ padding: "28px 30px 40px", flex: 1 }}>
 
@@ -783,20 +724,18 @@ export default function CandidatesPage() {
             {/* Table */}
             <div style={{ background: T.white, borderRadius: 16, border: `1px solid ${T.navy7}`, overflow: "hidden", boxShadow: "0 1px 4px rgba(0,0,0,.05)" }}>
               <div style={{ overflowX: "auto" }}>
-                <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 1100 }}>
+                <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 1400 }}>
                   <thead>
                     <tr style={{ background: T.navy8, borderBottom: `1px solid ${T.navy7}` }}>
-                      {["Candidate", "Role", "Session ID", "Scheduled", "Score", "Recommendation", "Status", "Report", "Actions"].map(h => (
+                      {["Candidate", "Role", "Session ID", "Scheduled", "Overall Score", "MCQ Score", "Comm. Score", "Resume Match", "Recommendation", "Status", "Report"].map(h => (
                         <th key={h} style={{ padding: "12px 18px", textAlign: "left", fontSize: 11, fontWeight: 700, color: T.navy4, letterSpacing: ".06em", textTransform: "uppercase", whiteSpace: "nowrap" }}>{h}</th>
                       ))}
                     </tr>
                   </thead>
                   <tbody>
-                    {filtered.map((c, i) => {
+                    {pageRows.map((c, i) => {
                       const sc = STATUS_CONFIG[c.status] || STATUS_CONFIG.Scheduled;
                       const StatusIcon = sc.icon;
-                      const hasDecisionMade = decisionMade[c.id];
-                      const isSavingDecision = savingDecision[c.id];
                       
                       return (
                         <tr key={c.id}
@@ -824,6 +763,48 @@ export default function CandidatesPage() {
                                   <div style={{ height: "100%", width: `${c.score}%`, borderRadius: 999, background: c.score >= 85 ? T.success : c.score >= 70 ? T.warning : T.error }} />
                                 </div>
                                 <span style={{ fontSize: 13, fontWeight: 700, color: T.navy0 }}>{c.score}</span>
+                              </div>
+                            ) : (
+                              <span style={{ fontSize: 12, color: T.navy5 }}>—</span>
+                            )}
+                          </td>
+
+                          {/* MCQ Score */}
+                          <td style={{ padding: "13px 18px" }}>
+                            {c.mcqScore !== null ? (
+                              <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+                                <div style={{ width: 44, height: 6, background: T.navy8, borderRadius: 999, overflow: "hidden" }}>
+                                  <div style={{ height: "100%", width: `${c.mcqScore}%`, borderRadius: 999, background: "#0891B2" }} />
+                                </div>
+                                <span style={{ fontSize: 13, fontWeight: 700, color: "#0891B2" }}>{c.mcqScore}</span>
+                              </div>
+                            ) : (
+                              <span style={{ fontSize: 12, color: T.navy5 }}>—</span>
+                            )}
+                          </td>
+
+                          {/* Communication Score */}
+                          <td style={{ padding: "13px 18px" }}>
+                            {c.communicationScore !== null ? (
+                              <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+                                <div style={{ width: 44, height: 6, background: T.navy8, borderRadius: 999, overflow: "hidden" }}>
+                                  <div style={{ height: "100%", width: `${c.communicationScore}%`, borderRadius: 999, background: "#D97706" }} />
+                                </div>
+                                <span style={{ fontSize: 13, fontWeight: 700, color: "#D97706" }}>{c.communicationScore}</span>
+                              </div>
+                            ) : (
+                              <span style={{ fontSize: 12, color: T.navy5 }}>—</span>
+                            )}
+                          </td>
+
+                          {/* Resume Match */}
+                          <td style={{ padding: "13px 18px" }}>
+                            {c.resumeMatch !== null ? (
+                              <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+                                <div style={{ width: 44, height: 6, background: T.navy8, borderRadius: 999, overflow: "hidden" }}>
+                                  <div style={{ height: "100%", width: `${c.resumeMatch}%`, borderRadius: 999, background: "#16A34A" }} />
+                                </div>
+                                <span style={{ fontSize: 13, fontWeight: 700, color: "#16A34A" }}>{c.resumeMatch}%</span>
                               </div>
                             ) : (
                               <span style={{ fontSize: 12, color: T.navy5 }}>—</span>
@@ -869,41 +850,6 @@ export default function CandidatesPage() {
                             </button>
                           </td>
 
-                          {/* Actions - Accept, Hold, Reject */}
-                          <td style={{ padding: "13px 18px" }}>
-                            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                              {Object.entries(ACTION_CONFIG).map(([label, config]) => {
-                                const Icon = config.icon;
-                                const active = hasDecisionMade === label;
-                                return (
-                                  <button
-                                    key={label}
-                                    onClick={() => handleDecision(c, label)}
-                                    disabled={isSavingDecision}
-                                    style={{
-                                      background: active ? config.activeBg : config.bg,
-                                      border: active ? `1px solid ${config.activeBg}` : "1px solid transparent",
-                                      borderRadius: 6,
-                                      padding: "5px 10px",
-                                      cursor: isSavingDecision ? "not-allowed" : "pointer",
-                                      opacity: isSavingDecision ? 0.55 : 1,
-                                      display: "flex",
-                                      alignItems: "center",
-                                      gap: 5,
-                                      fontSize: 11,
-                                      fontWeight: 700,
-                                      color: active ? "#fff" : config.color,
-                                      fontFamily: FONT,
-                                      boxShadow: active ? `0 0 0 2px ${config.bg}` : "none",
-                                    }}
-                                    title={`${label} Candidate`}
-                                  >
-                                    <Icon size={13} /> {label}
-                                  </button>
-                                );
-                              })}
-                            </div>
-                          </td>
                         </tr>
                       );
                     })}
@@ -912,12 +858,37 @@ export default function CandidatesPage() {
               </div>
 
               {/* Pagination */}
-              <div style={{ padding: "14px 20px", borderTop: `1px solid ${T.navy7}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <span style={{ fontSize: 12, color: T.navy5 }}>Showing {filtered.length} results</span>
-                <div style={{ display: "flex", gap: 6 }}>
-                  {[1,2,3].map(p => (
-                    <button key={p} style={{ width: 30, height: 30, borderRadius: 7, border: p === 1 ? "none" : `1px solid ${T.navy7}`, background: p === 1 ? T.primary : T.white, color: p === 1 ? "#fff" : T.navy3, fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: FONT }}>{p}</button>
-                  ))}
+              <div style={{ padding: "14px 20px", borderTop: `1px solid ${T.navy7}`, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
+                <span style={{ fontSize: 12, color: T.navy5 }}>
+                  Showing <strong style={{ color: T.navy1 }}>{(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, filtered.length)}</strong> of <strong style={{ color: T.navy1 }}>{filtered.length}</strong> candidates
+                </span>
+                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                  <button
+                    onClick={() => setPage(p => Math.max(1, p - 1))}
+                    disabled={page <= 1}
+                    style={{ width: 30, height: 30, borderRadius: 7, border: `1px solid ${T.navy7}`, background: T.white, color: page <= 1 ? T.navy6 : T.navy2, cursor: page <= 1 ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: FONT }}
+                  >
+                    <ChevronLeft size={14} />
+                  </button>
+                  {Array.from({ length: totalPages }, (_, i) => i + 1)
+                    .filter(n => n === 1 || n === totalPages || Math.abs(n - page) <= 1)
+                    .reduce((acc, n, idx, arr) => {
+                      if (idx > 0 && n - arr[idx - 1] > 1) acc.push("…");
+                      acc.push(n);
+                      return acc;
+                    }, [])
+                    .map((n, idx) => n === "…"
+                      ? <span key={`ellipsis-${idx}`} style={{ fontSize: 12, color: T.navy5, padding: "0 4px" }}>…</span>
+                      : <button key={n} onClick={() => setPage(n)} style={{ width: 30, height: 30, borderRadius: 7, border: n === page ? "none" : `1px solid ${T.navy7}`, background: n === page ? T.primary : T.white, color: n === page ? "#fff" : T.navy3, fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: FONT }}>{n}</button>
+                    )
+                  }
+                  <button
+                    onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                    disabled={page >= totalPages}
+                    style={{ width: 30, height: 30, borderRadius: 7, border: `1px solid ${T.navy7}`, background: T.white, color: page >= totalPages ? T.navy6 : T.navy2, cursor: page >= totalPages ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: FONT }}
+                  >
+                    <ChevronRight size={14} />
+                  </button>
                 </div>
               </div>
             </div>

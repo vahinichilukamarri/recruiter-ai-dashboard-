@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import {
   Bell, Search, TrendingUp, TrendingDown,
   Users, ClipboardList, Star, CheckCircle2,
-  Menu,
 } from "lucide-react";
 import Sidebar, { T, FONT, SIDEBAR_W_EXPANDED, SIDEBAR_W_COLLAPSED, useSidebarWidth, MOBILE_BREAKPOINT } from "../components/Sidebar";
 import NotificationBell from "../components/NotificationBell";
@@ -518,20 +517,6 @@ export default function Dashboard() {
           }}>
             {/* Left */}
             <div style={{ display: "flex", alignItems: "center", gap: 12, flex: 1, minWidth: 0 }}>
-              <button
-                onClick={() => setCollapsed(v => !v)}
-                style={{
-                  background: T.navy8, border: "none", borderRadius: 8,
-                  padding: "7px 8px", cursor: "pointer",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  transition: "background .15s",
-                  flexShrink: 0,
-                }}
-                onMouseEnter={e => (e.currentTarget.style.background = T.navy7)}
-                onMouseLeave={e => (e.currentTarget.style.background = T.navy8)}
-              >
-                <Menu size={16} color={T.navy3} />
-              </button>
               <div style={{ position: "relative", flex: 1, maxWidth: 340, minWidth: 0 }}>
                 <Search size={14} color={T.navy5} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
                 <input

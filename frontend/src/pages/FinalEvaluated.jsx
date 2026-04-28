@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, Fragment } from "react";
 import {
-  Bell, Search, Menu, Download, FileText, Eye, Archive,
+  Bell, Search, Download, FileText, Eye, Archive,
   RotateCcw, ChevronDown, ChevronUp, ChevronLeft, ChevronRight,
   Filter, CheckCircle2, XCircle, Clock, Shield, TrendingUp,
   Award, Users, Calendar, Star, X, MoreVertical, Sparkles,
@@ -415,6 +415,78 @@ const DECISION_PILL = {
   Escalated: { bg: "#CFFAFE", color: "#0891B2", dot: "#0891B2" },
 };
 
+function buildReportHTML(c) {
+  const scoreColor = c.finalScore >= 85 ? '#16A34A' : c.finalScore >= 70 ? '#D97706' : '#DC2626';
+  const decPill = DECISION_PILL[c.decision] || { bg: '#F3F4F6', color: '#374151' };
+  const scoreCard = (label, value, color) =>
+    `<div class="card"><div class="card-label">${label}</div><div class="card-value" style="color:${color ?? '#1a1a2e'}">${value ?? '—'}</div></div>`;
+
+  return `<!DOCTYPE html><html><head><meta charset="utf-8">
+<title>Evaluation Report – ${c.name}</title>
+<style>
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;margin:0;padding:32px;color:#1a1a2e}
+  h1{font-size:22px;margin:0 0 4px}
+  .sub{font-size:13px;color:#666;margin-bottom:24px}
+  .section{margin-bottom:24px}
+  .section-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#888;margin-bottom:10px}
+  .score-big{font-size:56px;font-weight:800;color:${scoreColor};line-height:1}
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  .card{background:#f8f8fc;border-radius:10px;padding:14px}
+  .card-label{font-size:11px;color:#888;margin-bottom:4px}
+  .card-value{font-size:20px;font-weight:700}
+  .pill{display:inline-block;padding:3px 12px;border-radius:999px;font-size:12px;font-weight:600;background:${decPill.bg};color:${decPill.color}}
+  .ai-pill{display:inline-block;padding:3px 12px;border-radius:999px;font-size:12px;font-weight:600;background:#EDE9FF;color:#5929D0}
+  .notes-box{background:#f8f8fc;border-radius:10px;padding:14px;font-size:13px;line-height:1.6;color:#374151}
+  .summary-box{background:#EDE9FF;border-radius:12px;padding:16px;font-size:13px;line-height:1.6}
+  hr{border:none;border-top:1px solid #e5e7eb;margin:20px 0}
+  @media print{body{padding:16px}}
+</style></head><body>
+<h1>${c.name}</h1>
+<div class="sub">${c.role} · ${c.department} · ${c.id} · Decision Date: ${c.decisionDate}</div>
+
+<div class="section">
+  <div class="section-title">Overall Score</div>
+  <div style="display:flex;align-items:center;gap:24px;flex-wrap:wrap">
+    <div class="score-big">${c.finalScore}</div>
+    <div>
+      <div style="margin-bottom:6px"><span class="pill">${c.decision}</span></div>
+      <div style="margin-bottom:6px"><span class="ai-pill">AI: ${c.aiRecommendation}</span></div>
+      <div style="font-size:12px;color:#666">Experience: <b>${c.experience}y</b> &nbsp;·&nbsp; Confidence: <b>${c.confidence}%</b></div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">Score Breakdown</div>
+  <div class="grid">
+    ${scoreCard('AI Score', c.aiScore, '#5929D0')}
+    ${scoreCard('Interview Score', c.interviewScore, '#0891B2')}
+    ${scoreCard('MCQ Score', c.mcqScore != null ? c.mcqScore : null, '#0891B2')}
+    ${scoreCard('Communication', c.communicationScore != null ? c.communicationScore : null, '#D97706')}
+    ${scoreCard('Resume Match', c.resumeMatch != null ? c.resumeMatch + '%' : null, '#16A34A')}
+    ${scoreCard('Bias Check', c.biasSafe ? '✓ Safe' : '⚠ Flagged', c.biasSafe ? '#16A34A' : '#DC2626')}
+  </div>
+</div>
+
+<hr/>
+
+<div class="section">
+  <div class="section-title">Interviewer Notes</div>
+  <div class="notes-box">${c.interviewerNotes}</div>
+</div>
+
+<div class="section">
+  <div class="section-title">Recruiter Notes</div>
+  <div class="notes-box">${c.recruiterNotes}</div>
+</div>
+
+<div class="section">
+  <div class="section-title">AI Recommendation Summary</div>
+  <div class="summary-box">${c.aiSummary}</div>
+</div>
+</body></html>`;
+}
+
 export default function FinalEvaluated() {
   const [collapsed, setCollapsed] = useState(false);
   const SW = collapsed ? SIDEBAR_W_COLLAPSED : SIDEBAR_W_EXPANDED;
@@ -487,6 +559,9 @@ export default function FinalEvaluated() {
             humanFinalDecision: decision.human_final_decision,
             ini: initials(candidate.full_name),
             color: colors[index % colors.length],
+            mcqScore: assessment.mcq_score_percent != null ? Math.round(assessment.mcq_score_percent) : null,
+            communicationScore: interview.communication_score != null ? Math.round(interview.communication_score) : null,
+            resumeMatch: assessment.resume_match_percent != null ? Math.round(assessment.resume_match_percent) : null,
             interviewerNotes: interview.transcript_summary || "No interviewer notes available.",
             recruiterNotes: decision.decision_notes || "No recruiter notes added.",
             aiSummary: agent.summary || "No AI summary available.",
@@ -559,7 +634,14 @@ export default function FinalEvaluated() {
   };
 
   const handleExportReport = (candidate) => {
-    setToast(`Exporting report for ${candidate.name}...`);
+    const win = window.open("", "_blank", "width=960,height=720");
+    if (!win) {
+      setToast("Pop-up blocked — please allow pop-ups and try again.");
+      return;
+    }
+    win.document.write(buildReportHTML(candidate));
+    win.document.close();
+    win.onload = () => { win.focus(); win.print(); };
   };
 
   const onResetFilters = () => { setFilters(initialFilters); setPage(1); };
@@ -639,15 +721,6 @@ export default function FinalEvaluated() {
             gap: 18, flexShrink: 0,
           }}>
             <div style={{ display: "flex", alignItems: "center", gap: 12, flex: 1 }}>
-              <button
-                onClick={() => setCollapsed(v => !v)}
-                style={{
-                  background: T.navy8, border: "none", borderRadius: 8,
-                  padding: "7px 8px", cursor: "pointer",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                }}>
-                <Menu size={16} color={T.navy3} />
-              </button>
               <div style={{ position: "relative", flex: 1, maxWidth: 340 }}>
                 <Search size={14} color={T.navy5} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
                 <input

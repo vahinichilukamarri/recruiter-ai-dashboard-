@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, Fragment } from "react";
+import { useState, useEffect, useMemo, useRef, Fragment } from "react";
 import {
   Bell, Search, Download, FileText, Eye, Archive,
   RotateCcw, ChevronDown, ChevronUp, ChevronLeft, ChevronRight,
@@ -130,7 +130,7 @@ const ReportDetailModal = ({ candidate, onClose, onExport }) => {
       padding: 24,
       overflowY: "auto"
     }} onClick={onClose}>
-      <div className="modal-animate" style={{
+      <div className="modal-animate is-animating" onAnimationEnd={e => e.currentTarget.classList.remove('is-animating')} style={{
         background: T.white,
         borderRadius: 24,
         maxWidth: 900,
@@ -143,6 +143,7 @@ const ReportDetailModal = ({ candidate, onClose, onExport }) => {
         
         <button
           id="final-evaluated-btn-report-modal-close"
+          data-testid="final-evaluated-btn-report-modal-close"
           onClick={onClose}
           style={{
             position: "absolute",
@@ -254,6 +255,7 @@ const ReportDetailModal = ({ candidate, onClose, onExport }) => {
           <div style={{ display: "flex", gap: 12, justifyContent: "flex-end" }}>
             <button
               id="final-evaluated-btn-report-export-pdf"
+              data-testid="final-evaluated-btn-report-export-pdf"
               onClick={() => onExport(candidate)}
               style={{
                 padding: "10px 20px",
@@ -273,6 +275,7 @@ const ReportDetailModal = ({ candidate, onClose, onExport }) => {
             </button>
             <button
               id="final-evaluated-btn-report-close"
+              data-testid="final-evaluated-btn-report-close"
               onClick={onClose}
               style={{
                 padding: "10px 24px",
@@ -493,6 +496,8 @@ function buildReportHTML(c) {
 export default function FinalEvaluated() {
   const [collapsed, setCollapsed] = useState(false);
   const SW = collapsed ? SIDEBAR_W_COLLAPSED : SIDEBAR_W_EXPANDED;
+  const rootRef = useRef(null);
+  useEffect(() => { rootRef.current?.setAttribute('data-page-ready', 'true'); }, []);
 
   const [loading, setLoading] = useState(true);
   const [records, setRecords] = useState(RAW_CANDIDATES);

@@ -114,6 +114,8 @@ const ReportCard = ({ report, onViewReport }) => {
         </div>
         <button
           id={`reports-btn-view-${report.id}`}
+          data-testid={`reports-btn-view-${report.id}`}
+          data-el-id="EL-016"
           onClick={(e) => { e.stopPropagation(); onViewReport(report); }}
           style={{
             background: T.primaryLight,
@@ -139,6 +141,7 @@ const ReportCard = ({ report, onViewReport }) => {
 const FilterChip = ({ label, active, onClick, chipId }) => (
   <button
     id={chipId}
+    data-testid={chipId}
     onClick={onClick}
     style={{
       padding: "6px 14px",
@@ -202,6 +205,7 @@ const FeedbackModal = ({ onClose, onSubmit }) => {
           <p style={{ fontSize: 14, color: T.navy4, marginBottom: 20 }}>Your feedback has been submitted successfully.</p>
           <button
             id="reports-btn-feedback-submitted-close"
+            data-testid="reports-btn-feedback-submitted-close"
             onClick={onClose}
             style={{
               padding: "10px 24px",
@@ -236,7 +240,7 @@ const FeedbackModal = ({ onClose, onSubmit }) => {
       justifyContent: "center",
       padding: 24,
     }} onClick={onClose}>
-      <div className="modal-animate" style={{
+      <div className="modal-animate is-animating" onAnimationEnd={e => e.currentTarget.classList.remove('is-animating')} style={{
         background: T.white,
         borderRadius: 24,
         maxWidth: 550,
@@ -247,6 +251,8 @@ const FeedbackModal = ({ onClose, onSubmit }) => {
         
         <button
           id="reports-btn-feedback-modal-close"
+          data-testid="reports-btn-feedback-modal-close"
+          data-el-id="EL-023"
           onClick={onClose}
           style={{
             position: "absolute",
@@ -283,11 +289,12 @@ const FeedbackModal = ({ onClose, onSubmit }) => {
             <label style={{ fontSize: 13, fontWeight: 600, color: T.navy2, marginBottom: 8, display: "block" }}>
               How would you rate your experience?
             </label>
-            <div style={{ display: "flex", gap: 8 }}>
+            <div data-el-id="EL-020" style={{ display: "flex", gap: 8 }}>
               {[1, 2, 3, 4, 5].map((star) => (
                 <button
                   key={star}
                   id={`reports-btn-feedback-star-${star}`}
+                  data-testid={`reports-btn-feedback-star-${star}`}
                   onClick={() => setRating(star)}
                   onMouseEnter={() => setHoveredRating(star)}
                   onMouseLeave={() => setHoveredRating(0)}
@@ -325,6 +332,9 @@ const FeedbackModal = ({ onClose, onSubmit }) => {
               Share your feedback
             </label>
             <textarea
+              data-testid="reports-btn-feedback-comment"
+              aria-label="Feedback comment"
+              data-el-id="EL-021"
               value={feedback}
               onChange={(e) => setFeedback(e.target.value)}
               placeholder="Tell us what you liked or what we can improve..."
@@ -372,6 +382,7 @@ const FeedbackModal = ({ onClose, onSubmit }) => {
           <div style={{ display: "flex", gap: 12, justifyContent: "flex-end" }}>
             <button
               id="reports-btn-feedback-cancel"
+              data-testid="reports-btn-feedback-cancel"
               onClick={onClose}
               style={{
                 padding: "10px 20px",
@@ -388,6 +399,8 @@ const FeedbackModal = ({ onClose, onSubmit }) => {
             </button>
             <button
               id="reports-btn-feedback-submit"
+              data-testid="reports-btn-feedback-submit"
+              data-el-id="EL-022"
               onClick={handleSubmit}
               disabled={!feedback.trim() || rating === 0}
               style={{ 
@@ -597,6 +610,7 @@ export default function Reports() {
               <Search size={14} color={T.navy5} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)" }} />
               <input
                 id="reports-search-bar"
+                data-testid="reports-search-bar"
                 placeholder="Search reports by candidate, ID, or role..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -621,6 +635,8 @@ export default function Reports() {
             {/* Feedback Button */}
             <button
               id="reports-btn-feedback"
+              data-testid="reports-btn-feedback"
+              data-el-id="EL-019"
               onClick={() => setShowFeedbackModal(true)}
               style={{ 
                 display: "flex", 
@@ -784,6 +800,7 @@ export default function Reports() {
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                 <button
                   id="reports-pagination-prev"
+                  data-testid="reports-pagination-prev"
                   onClick={() => setPage(p => Math.max(1, p - 1))}
                   disabled={page <= 1}
                   style={{
@@ -804,6 +821,7 @@ export default function Reports() {
                     <button
                       key={n}
                       id={`reports-pagination-page-${n}`}
+                      data-testid={`reports-pagination-page-${n}`}
                       onClick={() => setPage(n)}
                       title={`Page ${n}`}
                       style={{
@@ -826,6 +844,7 @@ export default function Reports() {
 
                 <button
                   id="reports-pagination-next"
+                  data-testid="reports-pagination-next"
                   onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                   disabled={page >= totalPages}
                   style={{
@@ -908,7 +927,7 @@ export default function Reports() {
                 <h2 style={{ fontSize: 20, fontWeight: 800, color: T.navy0 }}>{selectedReport.candidate}</h2>
                 <div style={{ fontSize: 13, color: T.navy4 }}>{selectedReport.role}</div>
               </div>
-              <button id="reports-btn-report-modal-close" onClick={handleCloseModal} style={{
+              <button id="reports-btn-report-modal-close" data-testid="reports-btn-report-modal-close" onClick={handleCloseModal} style={{
                 background: T.navy8,
                 border: "none",
                 borderRadius: 8,
@@ -1005,6 +1024,7 @@ export default function Reports() {
               <div style={{ paddingTop: 8, borderTop: `1px solid ${T.navy7}` }}>
                 <button
                   id="reports-btn-report-modal-dismiss"
+                  data-testid="reports-btn-report-modal-dismiss"
                   onClick={handleCloseModal}
                   style={{
                     width: "100%",

@@ -74,7 +74,7 @@ const ReportDetailModal = ({ candidate, onClose, onExport }) => {
       padding: 24,
       overflowY: "auto"
     }} onClick={onClose}>
-      <div className="modal-animate" style={{
+      <div className="modal-animate is-animating" onAnimationEnd={e => e.currentTarget.classList.remove('is-animating')} style={{
         background: T.white,
         borderRadius: 24,
         maxWidth: 900,
@@ -87,6 +87,8 @@ const ReportDetailModal = ({ candidate, onClose, onExport }) => {
         
         <button
           id="candidates-btn-report-modal-close"
+          data-testid="candidates-btn-report-modal-close"
+          data-el-id="EL-011"
           onClick={onClose}
           style={{
             position: "absolute",
@@ -206,6 +208,8 @@ const ReportDetailModal = ({ candidate, onClose, onExport }) => {
           <div style={{ display: "flex", gap: 12, justifyContent: "flex-end" }}>
             <button
               id="candidates-btn-report-export-pdf"
+              data-testid="candidates-btn-report-export-pdf"
+              data-el-id="EL-012"
               onClick={() => onExport(candidate)}
               style={{
                 padding: "10px 20px",
@@ -225,6 +229,7 @@ const ReportDetailModal = ({ candidate, onClose, onExport }) => {
             </button>
             <button
               id="candidates-btn-report-close"
+              data-testid="candidates-btn-report-close"
               onClick={onClose}
               style={{
                 padding: "10px 24px",
@@ -366,7 +371,7 @@ const ExportRangeModal = ({ candidates, onClose }) => {
   return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.55)", backdropFilter: "blur(4px)", zIndex: 1100, display: "flex", alignItems: "center", justifyContent: "center" }} onClick={onClose}>
       <div style={{ background: T.white, borderRadius: 20, width: 420, padding: "28px 28px 24px", boxShadow: "0 20px 50px rgba(0,0,0,.2)", position: "relative" }} onClick={e => e.stopPropagation()}>
-        <button id="candidates-btn-export-modal-close" onClick={onClose} style={{ position: "absolute", top: 16, right: 16, background: T.navy8, border: "none", borderRadius: 8, width: 32, height: 32, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <button id="candidates-btn-export-modal-close" data-testid="candidates-btn-export-modal-close" onClick={onClose} style={{ position: "absolute", top: 16, right: 16, background: T.navy8, border: "none", borderRadius: 8, width: 32, height: 32, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
           <X size={16} color={T.navy3} />
         </button>
         <div style={{ fontSize: 16, fontWeight: 700, color: T.navy0, marginBottom: 6 }}>Export Candidate Report</div>
@@ -391,10 +396,10 @@ const ExportRangeModal = ({ candidates, onClose }) => {
           {count > 0 ? `Will export ${count} candidate${count !== 1 ? "s" : ""} (records ${from}–${Math.min(to, total)})` : "No records in this range"}
         </div>
         <div style={{ display: "flex", gap: 10 }}>
-          <button id="candidates-btn-export-cancel" onClick={onClose} style={{ flex: 1, padding: "10px 0", background: T.navy8, border: `1px solid ${T.navy7}`, borderRadius: 10, fontSize: 13, fontWeight: 600, color: T.navy2, cursor: "pointer", fontFamily: FONT }}>
+          <button id="candidates-btn-export-cancel" data-testid="candidates-btn-export-cancel" onClick={onClose} style={{ flex: 1, padding: "10px 0", background: T.navy8, border: `1px solid ${T.navy7}`, borderRadius: 10, fontSize: 13, fontWeight: 600, color: T.navy2, cursor: "pointer", fontFamily: FONT }}>
             Cancel
           </button>
-          <button id="candidates-btn-export-confirm" onClick={handleExport} disabled={count === 0} style={{ flex: 2, padding: "10px 0", background: count === 0 ? T.navy7 : T.primary, border: "none", borderRadius: 10, fontSize: 13, fontWeight: 700, color: "#fff", cursor: count === 0 ? "not-allowed" : "pointer", fontFamily: FONT, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+          <button id="candidates-btn-export-confirm" data-testid="candidates-btn-export-confirm" onClick={handleExport} disabled={count === 0} style={{ flex: 2, padding: "10px 0", background: count === 0 ? T.navy7 : T.primary, border: "none", borderRadius: 10, fontSize: 13, fontWeight: 700, color: "#fff", cursor: count === 0 ? "not-allowed" : "pointer", fontFamily: FONT, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
             <Download size={14} /> Export {count > 0 ? `${count} Records` : ""}
           </button>
         </div>
@@ -411,6 +416,7 @@ function Header({ searchTerm, onSearchChange }) {
           <Search size={14} color={T.navy5} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
           <input
             id="candidates-search-bar"
+            data-testid="candidates-search-bar"
             placeholder="Search candidates by name, role, ID..."
             value={searchTerm}
             onChange={e => onSearchChange(e.target.value)}
@@ -585,7 +591,7 @@ export default function CandidatesPage() {
                 <p style={{ fontSize: 13, color: T.navy4, marginLeft: 14 }}>ATS Interview Status Panel — all candidates across active roles</p>
               </div>
               <div style={{ display: "flex", gap: 10 }}>
-                <button id="candidates-btn-export" onClick={() => setShowExportModal(true)} style={{ display: "flex", alignItems: "center", gap: 7, background: T.white, border: `1px solid ${T.navy7}`, borderRadius: 10, padding: "9px 16px", fontSize: 13, fontWeight: 600, color: T.navy2, cursor: "pointer", fontFamily: FONT }}>
+                <button id="candidates-btn-export" data-testid="candidates-btn-export" onClick={() => setShowExportModal(true)} style={{ display: "flex", alignItems: "center", gap: 7, background: T.white, border: `1px solid ${T.navy7}`, borderRadius: 10, padding: "9px 16px", fontSize: 13, fontWeight: 600, color: T.navy2, cursor: "pointer", fontFamily: FONT }}>
                   <Download size={14} /> Export
                 </button>
               </div>
@@ -611,7 +617,7 @@ export default function CandidatesPage() {
 
               <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                 {STATUSES.map(s => (
-                  <button key={s} id={`candidates-filter-status-${s.toLowerCase().replace(/\s+/g, "-")}`} onClick={() => setActiveStatus(s)} style={{
+                  <button key={s} id={`candidates-filter-status-${s.toLowerCase().replace(/\s+/g, "-")}`} data-testid={`candidates-filter-status-${s.toLowerCase().replace(/\s+/g, "-")}`} {...(s === "All" ? { "data-el-id": "EL-007" } : {})} onClick={() => setActiveStatus(s)} style={{
                     padding: "6px 14px", borderRadius: 20, border: "none", cursor: "pointer", fontFamily: FONT,
                     fontSize: 12, fontWeight: 600,
                     background: activeStatus === s ? T.primary : T.navy8,
@@ -624,7 +630,7 @@ export default function CandidatesPage() {
               <div style={{ width: 1, height: 24, background: T.navy7 }} />
 
               <div style={{ position: "relative" }}>
-                <select id="candidates-filter-role" value={activeRole} onChange={e => setActiveRole(e.target.value)} style={{
+                <select id="candidates-filter-role" data-testid="candidates-filter-role" data-el-id="EL-008" value={activeRole} onChange={e => setActiveRole(e.target.value)} style={{
                   appearance: "none", background: T.navy8, border: `1px solid ${T.navy7}`,
                   borderRadius: 8, padding: "7px 32px 7px 12px", fontSize: 12.5, fontWeight: 600,
                   color: T.navy2, fontFamily: FONT, cursor: "pointer", outline: "none",
@@ -637,6 +643,7 @@ export default function CandidatesPage() {
               <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 10 }}>
                 <button
                   id="candidates-btn-score-threshold"
+                  data-testid="candidates-btn-score-threshold"
                   onClick={() => setShowThreshold(v => !v)}
                   style={{
                     display: "flex", alignItems: "center", gap: 6,
@@ -658,6 +665,7 @@ export default function CandidatesPage() {
                 {activeThresholdCount > 0 && (
                   <button
                     id="candidates-btn-threshold-clear"
+                    data-testid="candidates-btn-threshold-clear"
                     onClick={() => setThresholds({ score: 0, mcqScore: 0, communicationScore: 0, resumeMatch: 0 })}
                     style={{ fontSize: 11, color: T.error, background: T.errorLight, border: "none", borderRadius: 6, padding: "4px 10px", cursor: "pointer", fontWeight: 600, fontFamily: FONT }}
                   >
@@ -708,6 +716,7 @@ export default function CandidatesPage() {
                               <button
                                 key={preset}
                                 id={`candidates-threshold-${key}-${preset}`}
+                                data-testid={`candidates-threshold-${key}-${preset}`}
                                 onClick={() => setThresholds(prev => ({ ...prev, [key]: preset }))}
                                 style={{
                                   fontSize: 10, fontWeight: 600, padding: "2px 6px", borderRadius: 4,
@@ -746,6 +755,7 @@ export default function CandidatesPage() {
                       
                       return (
                         <tr key={c.id}
+                          data-el-id="EL-009"
                           style={{ borderBottom: `1px solid ${T.navy7}`, background: hRow === i ? T.navy8 : T.white, transition: "background .12s", cursor: "default" }}
                           onMouseEnter={() => setHRow(i)} onMouseLeave={() => setHRow(null)}>
 
@@ -837,6 +847,8 @@ export default function CandidatesPage() {
                           <td style={{ padding: "13px 18px" }}>
                             <button
                               id={`candidates-btn-report-${c.id}`}
+                              data-testid={`candidates-btn-report-${c.id}`}
+                              data-el-id="EL-010"
                               onClick={() => handleViewReport(c)}
                               style={{
                                 background: T.primaryLight,
@@ -873,6 +885,7 @@ export default function CandidatesPage() {
                 <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                   <button
                     id="candidates-pagination-prev"
+                    data-testid="candidates-pagination-prev"
                     onClick={() => setPage(p => Math.max(1, p - 1))}
                     disabled={page <= 1}
                     style={{ width: 30, height: 30, borderRadius: 7, border: `1px solid ${T.navy7}`, background: T.white, color: page <= 1 ? T.navy6 : T.navy2, cursor: page <= 1 ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: FONT }}
@@ -888,11 +901,12 @@ export default function CandidatesPage() {
                     }, [])
                     .map((n, idx) => n === "…"
                       ? <span key={`ellipsis-${idx}`} style={{ fontSize: 12, color: T.navy5, padding: "0 4px" }}>…</span>
-                      : <button key={n} id={`candidates-pagination-page-${n}`} onClick={() => setPage(n)} style={{ width: 30, height: 30, borderRadius: 7, border: n === page ? "none" : `1px solid ${T.navy7}`, background: n === page ? T.primary : T.white, color: n === page ? "#fff" : T.navy3, fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: FONT }}>{n}</button>
+                      : <button key={n} id={`candidates-pagination-page-${n}`} data-testid={`candidates-pagination-page-${n}`} onClick={() => setPage(n)} style={{ width: 30, height: 30, borderRadius: 7, border: n === page ? "none" : `1px solid ${T.navy7}`, background: n === page ? T.primary : T.white, color: n === page ? "#fff" : T.navy3, fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: FONT }}>{n}</button>
                     )
                   }
                   <button
                     id="candidates-pagination-next"
+                    data-testid="candidates-pagination-next"
                     onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                     disabled={page >= totalPages}
                     style={{ width: 30, height: 30, borderRadius: 7, border: `1px solid ${T.navy7}`, background: T.white, color: page >= totalPages ? T.navy6 : T.navy2, cursor: page >= totalPages ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: FONT }}

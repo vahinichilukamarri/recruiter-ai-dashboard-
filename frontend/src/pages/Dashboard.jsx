@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Bell, Search, TrendingUp, TrendingDown,
@@ -78,12 +78,12 @@ function useCounter(target, duration = 1100) {
 }
 
 /* ─── STAT CARD ─── */
-function StatCard({ title, value, trend, trendUp, icon: Icon, accent, accentLight, delay = 0 }) {
+function StatCard({ title, value, trend, trendUp, icon: Icon, accent, accentLight, delay = 0, elId }) {
   const num = useCounter(typeof value === "string" ? parseFloat(value.replace(/,/g, "")) : value);
   const display = Number.isInteger(value) ? num.toLocaleString() : num.toFixed(1);
 
   return (
-    <div className="card-lift fade-up" style={{
+    <div className="card-lift fade-up" {...(elId ? { "data-el-id": elId } : {})} style={{
       animationDelay: `${delay}ms`,
       background: T.white, borderRadius: 18, border: `1px solid ${T.navy7}`,
       padding: "22px 24px", flex: "1 1 200px", minWidth: 190,
@@ -138,7 +138,7 @@ function FunnelChart() {
   const max = funnel[0]?.value || 1;
 
   return (
-    <div style={{
+    <div {...(ready ? { "data-loaded": "true" } : {})} style={{
       background: T.white, borderRadius: 18, border: `1px solid ${T.navy7}`,
       padding: "24px 26px", flex: "1 1 280px", minWidth: 260,
       boxShadow: "0 1px 4px rgba(0,0,0,.06)",
@@ -207,7 +207,7 @@ function LineChart() {
   const fillPath = `${linePath} L ${pts[pts.length-1].x} ${VH - pB} L ${pts[0].x} ${VH - pB} Z`;
 
   return (
-    <div style={{
+    <div {...(ready ? { "data-loaded": "true" } : {})} style={{
       background: T.white, borderRadius: 18, border: `1px solid ${T.navy7}`,
       padding: "24px 26px", flex: "1 1 320px", minWidth: 300,
       boxShadow: "0 1px 4px rgba(0,0,0,.06)",
@@ -372,6 +372,7 @@ function CandidateTable({ candidates = CANDIDATES }) {
         </div>
         <button
           id="dashboard-btn-view-all-candidates"
+          data-testid="dashboard-btn-view-all-candidates"
           onClick={() => navigate("/candidates")}
           style={{ fontSize: 12.5, fontWeight: 600, color: T.primary, cursor: "pointer", background: "transparent", border: "none", fontFamily: FONT }}
         >
@@ -427,8 +428,9 @@ export default function Dashboard() {
     total_selected: 89,
   });
   const [topCandidates, setTopCandidates] = useState(CANDIDATES);
-  // Responsive sidebar width: returns 0 on mobile (sidebar becomes drawer)
   const SW = useSidebarWidth(collapsed);
+  const rootRef = useRef(null);
+  useEffect(() => { rootRef.current?.setAttribute('data-page-ready', 'true'); }, []);
 
   useEffect(() => {
     let alive = true;
@@ -489,7 +491,7 @@ export default function Dashboard() {
         - The main-content div below is the ONLY scrollable container
         - height: 100vh + overflowY: auto = inner scroll column
       */}
-      <div style={{ display: "flex", height: "100%", width: "100%", overflow: "hidden", fontFamily: FONT }}>
+      <div ref={rootRef} style={{ display: "flex", height: "100%", width: "100%", overflow: "hidden", fontFamily: FONT }}>
 
         {/* Fixed Sidebar */}
         <Sidebar collapsed={collapsed} onToggle={() => setCollapsed(v => !v)} />
@@ -522,6 +524,7 @@ export default function Dashboard() {
                 <Search size={14} color={T.navy5} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
                 <input
                   id="dashboard-search-bar"
+                  data-testid="dashboard-search-bar"
                   placeholder="Search candidates..."
                   style={{
                     width: "100%", paddingLeft: 36, paddingRight: 14,
@@ -568,10 +571,10 @@ export default function Dashboard() {
 
             {/* KPI Cards */}
             <div style={{ display: "flex", gap: 18, flexWrap: "wrap", marginBottom: 26 }}>
-              <StatCard title="Total Candidates"     value={summary.total_candidates} trend="+12.4%" trendUp   icon={Users}         accent={T.primary}  accentLight={T.primaryLight} delay={0}   />
-              <StatCard title="Interviews Completed" value={summary.interviews_completed}  trend="+8.1%"  trendUp   icon={CheckCircle2}  accent={T.cyan}     accentLight={T.cyanLight}   delay={80}  />
-              <StatCard title="Avg Candidate Score"  value={summary.avg_mcq_score} trend="+2.3pts" trendUp  icon={Star}          accent={T.pink}     accentLight={T.pinkLight}   delay={160} />
-              <StatCard title="Shortlisted"          value={summary.total_selected}   trend="-3.2%"  trendUp={false} icon={ClipboardList} accent="#10B981" accentLight="#DCFCE7" delay={240} />
+              <StatCard title="Total Candidates"     value={summary.total_candidates} trend="+12.4%" trendUp   icon={Users}         accent={T.primary}  accentLight={T.primaryLight} delay={0}   elId="EL-002" />
+              <StatCard title="Interviews Completed" value={summary.interviews_completed}  trend="+8.1%"  trendUp   icon={CheckCircle2}  accent={T.cyan}     accentLight={T.cyanLight}   delay={80}  elId="EL-003" />
+              <StatCard title="Avg Candidate Score"  value={summary.avg_mcq_score} trend="+2.3pts" trendUp  icon={Star}          accent={T.pink}     accentLight={T.pinkLight}   delay={160} elId="EL-004" />
+              <StatCard title="Shortlisted"          value={summary.total_selected}   trend="-3.2%"  trendUp={false} icon={ClipboardList} accent="#10B981" accentLight="#DCFCE7" delay={240} elId="EL-005" />
             </div>
 
             {/* Charts */}

@@ -246,6 +246,7 @@ export default function Interviews() {
               <Search size={14} color={T.navy5} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)" }} />
               <input
                 id="interviews-search-bar"
+                data-testid="interviews-search-bar"
                 placeholder="Search interviews by candidate or ID..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -335,6 +336,7 @@ export default function Interviews() {
                 <button
                   key={status}
                   id={`interviews-filter-status-${status.toLowerCase().replace(/\s+/g, "-")}`}
+                  data-testid={`interviews-filter-status-${status.toLowerCase().replace(/\s+/g, "-")}`}
                   onClick={() => setStatusFilter(status)}
                   style={{
                     padding: "4px 12px", 
@@ -392,16 +394,16 @@ export default function Interviews() {
                           <td style={{ padding: "14px 20px", color: T.navy3 }}>{interview.date}</td>
                           <td style={{ padding: "14px 20px" }}>
                             {Status && (
-                              <span style={{ 
-                                display: "inline-flex", 
-                                alignItems: "center", 
-                                gap: 6, 
-                                padding: "4px 10px", 
-                                borderRadius: 20, 
-                                fontSize: 11, 
-                                fontWeight: 600, 
-                                background: Status.bg, 
-                                color: Status.color 
+                              <span data-el-id="EL-013" style={{
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: 6,
+                                padding: "4px 10px",
+                                borderRadius: 20,
+                                fontSize: 11,
+                                fontWeight: 600,
+                                background: Status.bg,
+                                color: Status.color
                               }}>
                                 <Status.icon size={12} /> {interview.status}
                               </span>
@@ -430,6 +432,7 @@ export default function Interviews() {
                   <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
                     <button
                       id="interviews-pagination-prev"
+                      data-testid="interviews-pagination-prev"
                       onClick={() => setPage(p => Math.max(1, p - 1))}
                       disabled={page === 1}
                       style={{ width: 32, height: 32, borderRadius: 8, border: `1px solid ${T.navy7}`, background: T.white, cursor: page === 1 ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", opacity: page === 1 ? 0.4 : 1 }}
@@ -442,12 +445,13 @@ export default function Interviews() {
                       .map((item, idx) => item === "…" ? (
                         <span key={`e${idx}`} style={{ width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, color: T.navy4 }}>…</span>
                       ) : (
-                        <button key={item} id={`interviews-pagination-page-${item}`} onClick={() => setPage(item)} style={{ width: 32, height: 32, borderRadius: 8, border: item === page ? "none" : `1px solid ${T.navy7}`, background: item === page ? T.primary : T.white, color: item === page ? "#fff" : T.navy3, fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: FONT }}>
+                        <button key={item} id={`interviews-pagination-page-${item}`} data-testid={`interviews-pagination-page-${item}`} onClick={() => setPage(item)} style={{ width: 32, height: 32, borderRadius: 8, border: item === page ? "none" : `1px solid ${T.navy7}`, background: item === page ? T.primary : T.white, color: item === page ? "#fff" : T.navy3, fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: FONT }}>
                           {item}
                         </button>
                       ))}
                     <button
                       id="interviews-pagination-next"
+                      data-testid="interviews-pagination-next"
                       onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                       disabled={page === totalPages}
                       style={{ width: 32, height: 32, borderRadius: 8, border: `1px solid ${T.navy7}`, background: T.white, cursor: page === totalPages ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", opacity: page === totalPages ? 0.4 : 1 }}
@@ -520,6 +524,7 @@ export default function Interviews() {
                   {dateFilter && (
                     <button
                       id="interviews-btn-date-filter-clear"
+                      data-testid="interviews-btn-date-filter-clear"
                       onClick={() => setDateFilter("")}
                       style={{
                         padding: "4px 8px",
@@ -544,6 +549,7 @@ export default function Interviews() {
                     <div key={`${item.role}_${item.date}`}>
                       <div
                         id={`interviews-upcoming-${item.role.toLowerCase().replace(/\s+/g, "-")}-${item.date}`}
+                        data-testid={`interviews-upcoming-${item.role.toLowerCase().replace(/\s+/g, "-")}-${item.date}`}
                         style={{
                           padding: "16px 20px",
                           borderBottom: `1px solid ${T.navy7}`,

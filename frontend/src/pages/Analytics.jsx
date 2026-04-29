@@ -1,5 +1,5 @@
 // src/pages/Analytics.jsx
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   TrendingUp, TrendingDown, Users, Clock, Award, Download,
   Calendar, Filter, ChevronDown, Star, CheckCircle, BarChart3,
@@ -139,7 +139,7 @@ const StatCard = ({ title, value, change, changeType, icon: Icon, color }) => (
 );
 
 const FunnelStep = ({ label, value, percentage, color }) => (
-  <div style={{ marginBottom: 20 }}>
+  <div data-el-id="EL-015" style={{ marginBottom: 20 }}>
     <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
       <span style={{ fontSize: 13, fontWeight: 600, color: T.navy2 }}>{label}</span>
       <span style={{ fontSize: 13, fontWeight: 700, color }}>{value.toLocaleString()}</span>
@@ -175,6 +175,8 @@ export default function Analytics() {
   const [apiError, setApiError] = useState(false);
   const [funnelItems, setFunnelItems] = useState([]);
   const [funnelLoading, setFunnelLoading] = useState(false);
+  const rootRef = useRef(null);
+  useEffect(() => { rootRef.current?.setAttribute('data-page-ready', 'true'); }, []);
 
   // Fetch raw data once for KPIs + department table
   useEffect(() => {
@@ -275,7 +277,7 @@ export default function Analytics() {
   const kpis          = analytics?.kpis;
 
   return (
-    <div style={{ display: "flex", height: "100%", overflow: "hidden", fontFamily: FONT, background: T.bg }}>
+    <div ref={rootRef} style={{ display: "flex", height: "100%", overflow: "hidden", fontFamily: FONT, background: T.bg }}>
       <Sidebar collapsed={collapsed} onToggle={() => setCollapsed(v => !v)} activeKey="analytics" />
       <div style={{ marginLeft: collapsed ? SIDEBAR_W_COLLAPSED : SIDEBAR_W_EXPANDED, flex: 1, height: "100vh", overflowY: "auto", transition: "margin-left .25s cubic-bezier(.4,0,.2,1)" }}>
 
@@ -287,6 +289,7 @@ export default function Analytics() {
               <Calendar size={14} color={T.navy4} />
               <select
                 id="analytics-filter-time-range"
+                data-testid="analytics-filter-time-range"
                 value={timeRange}
                 onChange={e => setTimeRange(e.target.value)}
                 style={{ background: "transparent", border: "none", fontSize: 12, fontWeight: 600, color: T.navy2, outline: "none", cursor: "pointer", fontFamily: FONT }}
@@ -304,7 +307,7 @@ export default function Analytics() {
           </div>
 
           <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
-            <button id="analytics-btn-export" style={{ display: "flex", alignItems: "center", gap: 6, background: T.white, border: `1px solid ${T.navy7}`, borderRadius: 8, padding: "8px 14px", fontSize: 12, fontWeight: 600, color: T.navy2, cursor: "pointer" }}>
+            <button id="analytics-btn-export" data-testid="analytics-btn-export" style={{ display: "flex", alignItems: "center", gap: 6, background: T.white, border: `1px solid ${T.navy7}`, borderRadius: 8, padding: "8px 14px", fontSize: 12, fontWeight: 600, color: T.navy2, cursor: "pointer" }}>
               <Download size={14} /> Export
             </button>
             <NotificationBell />
@@ -351,7 +354,7 @@ export default function Analytics() {
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24, marginBottom: 28 }}>
 
             {/* Hiring Funnel */}
-            <div style={{ background: T.white, borderRadius: 16, border: `1px solid ${T.navy7}`, padding: 24, boxShadow: "0 1px 3px rgba(0,0,0,.05)" }}>
+            <div {...(!funnelLoading && funnelData.length > 0 ? { "data-loaded": "true" } : {})} style={{ background: T.white, borderRadius: 16, border: `1px solid ${T.navy7}`, padding: 24, boxShadow: "0 1px 3px rgba(0,0,0,.05)" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 20 }}>
                 <div>
                   <h2 style={{ fontSize: 16, fontWeight: 700, color: T.navy0, marginBottom: 4 }}>Hiring Funnel</h2>
@@ -369,7 +372,7 @@ export default function Analytics() {
             </div>
 
             {/* Source Effectiveness (static/illustrative) */}
-            <div style={{ background: T.white, borderRadius: 16, border: `1px solid ${T.navy7}`, padding: 24, boxShadow: "0 1px 3px rgba(0,0,0,.05)" }}>
+            <div data-loaded="true" style={{ background: T.white, borderRadius: 16, border: `1px solid ${T.navy7}`, padding: 24, boxShadow: "0 1px 3px rgba(0,0,0,.05)" }}>
               <div style={{ marginBottom: 20 }}>
                 <h2 style={{ fontSize: 16, fontWeight: 700, color: T.navy0, marginBottom: 4 }}>Source Effectiveness</h2>
                 <p style={{ fontSize: 12, color: T.navy4 }}>Hire yield by sourcing channel (illustrative)</p>

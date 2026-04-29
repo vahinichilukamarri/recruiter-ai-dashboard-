@@ -1,7 +1,7 @@
 // src/pages/Desktop.jsx
 // Updated: Desktop icons (left column) + both widgets moved to right side
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/Desktop.css";
 
@@ -9,6 +9,8 @@ export default function Desktop() {
   const [hoveredIcon, setHoveredIcon] = useState(null);
   const [currentTime, setCurrentTime] = useState(new Date());
   const navigate = useNavigate();
+  const rootRef = useRef(null);
+  useEffect(() => { rootRef.current?.setAttribute('data-page-ready', 'true'); }, []);
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
@@ -338,7 +340,7 @@ export default function Desktop() {
   const priorityBg    = { high: "rgba(239,68,68,0.18)", medium: "rgba(245,158,11,0.18)", low: "rgba(34,197,94,0.18)" };
 
   return (
-    <div className="desktop">
+    <div ref={rootRef} className="desktop">
 
       {/* ── Wallpaper ── */}
       <div className="desktop-wallpaper">
@@ -359,6 +361,7 @@ export default function Desktop() {
             <div
               key={icon.id}
               id={`desktop-icon-${icon.id}`}
+              data-testid={`desktop-icon-${icon.id}`}
               className="d-icon"
               onMouseEnter={() => setHoveredIcon(icon.id)}
               onMouseLeave={() => setHoveredIcon(null)}
@@ -480,6 +483,8 @@ export default function Desktop() {
             <div
               key={item.id}
               id={`desktop-taskbar-${item.id}`}
+              data-testid={`desktop-taskbar-${item.id}`}
+              {...(item.id === "recruiter" ? { "data-el-id": "EL-001" } : {})}
               className={`taskbar-btn${item.active ? " taskbar-btn-active" : ""}${hoveredIcon === item.id ? " taskbar-btn-hovered" : ""}`}
               onMouseEnter={() => setHoveredIcon(item.id)}
               onMouseLeave={() => setHoveredIcon(null)}

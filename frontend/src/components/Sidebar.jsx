@@ -256,6 +256,8 @@ function Sidebar({ collapsed = false, onToggle = () => {}, activeKey = "" }) {
       {isMobile && !mobileOpen && (
         <button
           id="sidebar-btn-mobile-open"
+          data-testid="sidebar-btn-mobile-open"
+          data-el-id="EL-017"
           className="sb-mobile-fab"
           onClick={() => setMobileOpen(true)}
           aria-label="Open navigation"
@@ -342,6 +344,7 @@ function Sidebar({ collapsed = false, onToggle = () => {}, activeKey = "" }) {
           {!isMobile && !showCollapsed && (
             <button
               id="sidebar-btn-collapse"
+              data-testid="sidebar-btn-collapse"
               className="sb-toggle"
               onClick={onToggle}
               aria-label="Collapse sidebar"
@@ -360,6 +363,7 @@ function Sidebar({ collapsed = false, onToggle = () => {}, activeKey = "" }) {
           {isMobile && (
             <button
               id="sidebar-btn-mobile-close"
+              data-testid="sidebar-btn-mobile-close"
               className="sb-toggle"
               onClick={() => setMobileOpen(false)}
               aria-label="Close navigation"
@@ -381,6 +385,7 @@ function Sidebar({ collapsed = false, onToggle = () => {}, activeKey = "" }) {
           <div style={{ display: "flex", justifyContent: "center", padding: "10px 0 4px" }}>
             <button
               id="sidebar-btn-expand"
+              data-testid="sidebar-btn-expand"
               className="sb-toggle"
               onClick={onToggle}
               aria-label="Expand sidebar"
@@ -397,7 +402,7 @@ function Sidebar({ collapsed = false, onToggle = () => {}, activeKey = "" }) {
         )}
 
         {/* NAVIGATION */}
-        <nav style={{ padding: "12px 10px", flex: 1, overflowY: "auto", overflowX: "hidden" }}>
+        <nav data-el-id="EL-006" style={{ padding: "12px 10px", flex: 1, overflowY: "auto", overflowX: "hidden" }}>
           {!showCollapsed && (
             <div className="sb-label" style={{
               fontSize: 10.5, fontWeight: 700, color: T.navy5,
@@ -461,6 +466,7 @@ function NavRow({ item, active, collapsed, navId, onClick }) {
   return (
     <div
       id={navId}
+      data-testid={navId}
       className={`sb-nav-item${active ? " active" : ""}`}
       onClick={onClick}
       role="button"

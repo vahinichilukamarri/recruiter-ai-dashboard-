@@ -8,3 +8,15 @@ body {
   font-family: Inter, Arial, sans-serif;
   overflow: hidden;
 }
+
+/* ─── Highlight Pulse ─── */
+.highlight-pulse {
+  --pulse-duration: 2s;
+  animation: highlightPulse var(--pulse-duration) ease-in-out;
+}
+@keyframes highlightPulse {
+  0%,  100% { box-shadow: 0 0 0 0   rgba(167,139,250,0); }
+  25%        { box-shadow: 0 0 0 6px rgba(167,139,250,0.7); }
+  50%        { box-shadow: 0 0 0 10px rgba(167,139,250,0.4); }
+  75%        { box-shadow: 0 0 0 6px rgba(167,139,250,0.2); }
+}

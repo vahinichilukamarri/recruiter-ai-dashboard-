@@ -141,7 +141,8 @@ const ReportDetailModal = ({ candidate, onClose, onExport }) => {
         boxShadow: "0 25px 50px rgba(0,0,0,0.25)"
       }} onClick={(e) => e.stopPropagation()}>
         
-        <button 
+        <button
+          id="final-evaluated-btn-report-modal-close"
           onClick={onClose}
           style={{
             position: "absolute",
@@ -251,9 +252,10 @@ const ReportDetailModal = ({ candidate, onClose, onExport }) => {
           </div>
 
           <div style={{ display: "flex", gap: 12, justifyContent: "flex-end" }}>
-            <button 
+            <button
+              id="final-evaluated-btn-report-export-pdf"
               onClick={() => onExport(candidate)}
-              style={{ 
+              style={{
                 padding: "10px 20px",
                 background: T.white,
                 border: `1px solid ${T.navy7}`,
@@ -269,9 +271,10 @@ const ReportDetailModal = ({ candidate, onClose, onExport }) => {
             >
               <Download size={14} /> Export PDF
             </button>
-            <button 
+            <button
+              id="final-evaluated-btn-report-close"
               onClick={onClose}
-              style={{ 
+              style={{
                 padding: "10px 24px",
                 background: T.primary,
                 border: "none",
@@ -687,7 +690,7 @@ export default function FinalEvaluated() {
   const SortTh = ({ label, k, width }) => {
     const active = sort.key === k;
     return (
-      <th onClick={() => toggleSort(k)}
+      <th id={`final-evaluated-sort-${k.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`} onClick={() => toggleSort(k)}
         style={{
           padding: "11px 18px", textAlign: "left", fontSize: 11, fontWeight: 700,
           color: active ? T.primary : T.navy4, letterSpacing: ".06em", textTransform: "uppercase",
@@ -724,6 +727,7 @@ export default function FinalEvaluated() {
               <div style={{ position: "relative", flex: 1, maxWidth: 340 }}>
                 <Search size={14} color={T.navy5} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
                 <input
+                  id="final-evaluated-search-bar"
                   placeholder="Quick search candidates..."
                   value={filters.search}
                   onChange={e => setFilters(f => ({ ...f, search: e.target.value }))}
@@ -769,6 +773,7 @@ export default function FinalEvaluated() {
                   <SlidersHorizontal size={16} color={T.primary} />
                   <div style={{ fontSize: 13, fontWeight: 800, color: T.navy0 }}>Filters</div>
                   <button
+                    id="final-evaluated-btn-reset-filters"
                     onClick={onResetFilters}
                     className="fe-btn fe-btn-ghost"
                     style={{ marginLeft: "auto", padding: "6px 10px" }}
@@ -780,6 +785,7 @@ export default function FinalEvaluated() {
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 12 }}>
                   <FilterField label="Name or ID">
                     <input
+                      id="final-evaluated-filter-search"
                       value={filters.search}
                       onChange={e => updateFilter("search", e.target.value)}
                       placeholder="Search name, ID"
@@ -789,7 +795,7 @@ export default function FinalEvaluated() {
 
                   <FilterField label="Role">
                     <div style={{ position: "relative" }}>
-                      <select value={filters.role} onChange={e => updateFilter("role", e.target.value)} style={{ ...selectStyle, width: "100%" }}>
+                      <select id="final-evaluated-filter-role" value={filters.role} onChange={e => updateFilter("role", e.target.value)} style={{ ...selectStyle, width: "100%" }}>
                         <option value="">All roles</option>
                         {roles.map(role => <option key={role} value={role}>{role}</option>)}
                       </select>
@@ -799,7 +805,7 @@ export default function FinalEvaluated() {
 
                   <FilterField label="Department">
                     <div style={{ position: "relative" }}>
-                      <select value={filters.department} onChange={e => updateFilter("department", e.target.value)} style={{ ...selectStyle, width: "100%" }}>
+                      <select id="final-evaluated-filter-department" value={filters.department} onChange={e => updateFilter("department", e.target.value)} style={{ ...selectStyle, width: "100%" }}>
                         <option value="">All departments</option>
                         {departments.map(dept => <option key={dept} value={dept}>{dept}</option>)}
                       </select>
@@ -809,7 +815,7 @@ export default function FinalEvaluated() {
 
                   <FilterField label="Decision">
                     <div style={{ position: "relative" }}>
-                      <select value={filters.decision} onChange={e => updateFilter("decision", e.target.value)} style={{ ...selectStyle, width: "100%" }}>
+                      <select id="final-evaluated-filter-decision" value={filters.decision} onChange={e => updateFilter("decision", e.target.value)} style={{ ...selectStyle, width: "100%" }}>
                         <option value="">All decisions</option>
                         {Object.keys(DECISION_PILL).map(decision => <option key={decision} value={decision}>{decision}</option>)}
                       </select>
@@ -819,36 +825,36 @@ export default function FinalEvaluated() {
 
                   <FilterField label="Final Score">
                     <div style={{ display: "flex", gap: 6 }}>
-                      <input type="number" min="0" max="100" value={filters.minScore} onChange={e => updateFilter("minScore", Number(e.target.value) || 0)} style={{ ...inputStyle, width: "50%" }} />
-                      <input type="number" min="0" max="100" value={filters.maxScore} onChange={e => updateFilter("maxScore", Number(e.target.value) || 100)} style={{ ...inputStyle, width: "50%" }} />
+                      <input id="final-evaluated-filter-score-min" type="number" min="0" max="100" value={filters.minScore} onChange={e => updateFilter("minScore", Number(e.target.value) || 0)} style={{ ...inputStyle, width: "50%" }} />
+                      <input id="final-evaluated-filter-score-max" type="number" min="0" max="100" value={filters.maxScore} onChange={e => updateFilter("maxScore", Number(e.target.value) || 100)} style={{ ...inputStyle, width: "50%" }} />
                     </div>
                   </FilterField>
 
                   <FilterField label="Experience">
                     <div style={{ display: "flex", gap: 6 }}>
-                      <input type="number" min="0" value={filters.minExp} onChange={e => updateFilter("minExp", Number(e.target.value) || 0)} style={{ ...inputStyle, width: "50%" }} />
-                      <input type="number" min="0" value={filters.maxExp} onChange={e => updateFilter("maxExp", Number(e.target.value) || 20)} style={{ ...inputStyle, width: "50%" }} />
+                      <input id="final-evaluated-filter-exp-min" type="number" min="0" value={filters.minExp} onChange={e => updateFilter("minExp", Number(e.target.value) || 0)} style={{ ...inputStyle, width: "50%" }} />
+                      <input id="final-evaluated-filter-exp-max" type="number" min="0" value={filters.maxExp} onChange={e => updateFilter("maxExp", Number(e.target.value) || 20)} style={{ ...inputStyle, width: "50%" }} />
                     </div>
                   </FilterField>
 
                   <FilterField label="Interview Min">
-                    <input type="number" min="0" max="100" value={filters.minInterview} onChange={e => updateFilter("minInterview", Number(e.target.value) || 0)} style={inputStyle} />
+                    <input id="final-evaluated-filter-interview-min" type="number" min="0" max="100" value={filters.minInterview} onChange={e => updateFilter("minInterview", Number(e.target.value) || 0)} style={inputStyle} />
                   </FilterField>
 
                   <FilterField label="Confidence Min">
-                    <input type="number" min="0" max="100" value={filters.minConfidence} onChange={e => updateFilter("minConfidence", Number(e.target.value) || 0)} style={inputStyle} />
+                    <input id="final-evaluated-filter-confidence-min" type="number" min="0" max="100" value={filters.minConfidence} onChange={e => updateFilter("minConfidence", Number(e.target.value) || 0)} style={inputStyle} />
                   </FilterField>
 
                   <FilterField label="Date From">
-                    <input type="date" value={filters.dateFrom} onChange={e => updateFilter("dateFrom", e.target.value)} style={inputStyle} />
+                    <input id="final-evaluated-filter-date-from" type="date" value={filters.dateFrom} onChange={e => updateFilter("dateFrom", e.target.value)} style={inputStyle} />
                   </FilterField>
 
                   <FilterField label="Date To">
-                    <input type="date" value={filters.dateTo} onChange={e => updateFilter("dateTo", e.target.value)} style={inputStyle} />
+                    <input id="final-evaluated-filter-date-to" type="date" value={filters.dateTo} onChange={e => updateFilter("dateTo", e.target.value)} style={inputStyle} />
                   </FilterField>
 
                   <label style={{ display: "flex", alignItems: "center", gap: 8, alignSelf: "end", minHeight: 36, fontSize: 12, fontWeight: 700, color: T.navy3 }}>
-                    <input type="checkbox" checked={filters.biasSafeOnly} onChange={e => updateFilter("biasSafeOnly", e.target.checked)} />
+                    <input id="final-evaluated-filter-bias-safe" type="checkbox" checked={filters.biasSafeOnly} onChange={e => updateFilter("biasSafeOnly", e.target.checked)} />
                     Bias safe only
                   </label>
                 </div>
@@ -891,7 +897,7 @@ export default function FinalEvaluated() {
                             <td colSpan={13} style={{ padding: "60px 20px", textAlign: "center" }}>
                               <div style={{ fontSize: 40, marginBottom: 8 }}>🔍</div>
                               <div style={{ fontSize: 15, fontWeight: 700, color: T.navy1, marginBottom: 4 }}>No candidates match these filters</div>
-                              <button className="fe-btn fe-btn-primary" onClick={onResetFilters}>Reset filters</button>
+                              <button id="final-evaluated-btn-empty-reset-filters" className="fe-btn fe-btn-primary" onClick={onResetFilters}>Reset filters</button>
                             </td>
                           </tr>
                         )
@@ -936,7 +942,7 @@ export default function FinalEvaluated() {
                                 <td style={{ padding: "12px 18px", fontSize: 12, color: T.navy3 }}>{c.decisionDate}</td>
                                 <td style={{ padding: "12px 18px" }}><ConfidenceMeter value={c.confidence} /></td>
                                 <td style={{ padding: "12px 18px", textAlign: "right" }}>
-                                  <button className="fe-btn fe-btn-primary" onClick={() => handleViewReport(c)} style={{ padding: "6px 16px" }}>
+                                  <button id={`final-evaluated-btn-report-${c.id}`} className="fe-btn fe-btn-primary" onClick={() => handleViewReport(c)} style={{ padding: "6px 16px" }}>
                                     <FileText size={12} /> Report
                                   </button>
                                 </td>
@@ -963,15 +969,15 @@ export default function FinalEvaluated() {
                     Page <strong style={{ color: T.navy1 }}>{page}</strong> of <strong style={{ color: T.navy1 }}>{totalPages}</strong>
                   </div>
                   <div style={{ display: "flex", gap: 6 }}>
-                    <button className="fe-btn" disabled={page <= 1} onClick={() => setPage(p => Math.max(1, p - 1))}>
+                    <button id="final-evaluated-pagination-prev" className="fe-btn" disabled={page <= 1} onClick={() => setPage(p => Math.max(1, p - 1))}>
                       <ChevronLeft size={13} /> Prev
                     </button>
                     {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => i + 1).map(n => (
-                      <button key={n} onClick={() => setPage(n)} className={n === page ? "fe-btn fe-btn-primary" : "fe-btn"} style={{ minWidth: 34, justifyContent: "center" }}>
+                      <button key={n} id={`final-evaluated-pagination-page-${n}`} onClick={() => setPage(n)} className={n === page ? "fe-btn fe-btn-primary" : "fe-btn"} style={{ minWidth: 34, justifyContent: "center" }}>
                         {n}
                       </button>
                     ))}
-                    <button className="fe-btn" disabled={page >= totalPages} onClick={() => setPage(p => Math.min(totalPages, p + 1))}>
+                    <button id="final-evaluated-pagination-next" className="fe-btn" disabled={page >= totalPages} onClick={() => setPage(p => Math.min(totalPages, p + 1))}>
                       Next <ChevronRight size={13} />
                     </button>
                   </div>

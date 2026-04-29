@@ -113,6 +113,7 @@ const ReportCard = ({ report, onViewReport }) => {
           </span>
         </div>
         <button
+          id={`reports-btn-view-${report.id}`}
           onClick={(e) => { e.stopPropagation(); onViewReport(report); }}
           style={{
             background: T.primaryLight,
@@ -135,8 +136,9 @@ const ReportCard = ({ report, onViewReport }) => {
 };
 
 // Filter Chip Component
-const FilterChip = ({ label, active, onClick }) => (
-  <button 
+const FilterChip = ({ label, active, onClick, chipId }) => (
+  <button
+    id={chipId}
     onClick={onClick}
     style={{
       padding: "6px 14px",
@@ -199,6 +201,7 @@ const FeedbackModal = ({ onClose, onSubmit }) => {
           <h3 style={{ fontSize: 20, fontWeight: 700, color: T.navy0, marginBottom: 8 }}>Thank You!</h3>
           <p style={{ fontSize: 14, color: T.navy4, marginBottom: 20 }}>Your feedback has been submitted successfully.</p>
           <button
+            id="reports-btn-feedback-submitted-close"
             onClick={onClose}
             style={{
               padding: "10px 24px",
@@ -242,7 +245,8 @@ const FeedbackModal = ({ onClose, onSubmit }) => {
         boxShadow: "0 25px 50px rgba(0,0,0,0.25)"
       }} onClick={(e) => e.stopPropagation()}>
         
-        <button 
+        <button
+          id="reports-btn-feedback-modal-close"
           onClick={onClose}
           style={{
             position: "absolute",
@@ -283,6 +287,7 @@ const FeedbackModal = ({ onClose, onSubmit }) => {
               {[1, 2, 3, 4, 5].map((star) => (
                 <button
                   key={star}
+                  id={`reports-btn-feedback-star-${star}`}
                   onClick={() => setRating(star)}
                   onMouseEnter={() => setHoveredRating(star)}
                   onMouseLeave={() => setHoveredRating(0)}
@@ -365,9 +370,10 @@ const FeedbackModal = ({ onClose, onSubmit }) => {
 
           {/* Action Buttons */}
           <div style={{ display: "flex", gap: 12, justifyContent: "flex-end" }}>
-            <button 
+            <button
+              id="reports-btn-feedback-cancel"
               onClick={onClose}
-              style={{ 
+              style={{
                 padding: "10px 20px",
                 background: T.white,
                 border: `1px solid ${T.navy7}`,
@@ -380,7 +386,8 @@ const FeedbackModal = ({ onClose, onSubmit }) => {
             >
               Cancel
             </button>
-            <button 
+            <button
+              id="reports-btn-feedback-submit"
               onClick={handleSubmit}
               disabled={!feedback.trim() || rating === 0}
               style={{ 
@@ -588,8 +595,9 @@ export default function Reports() {
           <div style={{ display: "flex", alignItems: "center", gap: 12, flex: 1 }}>
             <div style={{ position: "relative", flex: 1, maxWidth: 340 }}>
               <Search size={14} color={T.navy5} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)" }} />
-              <input 
-                placeholder="Search reports by candidate, ID, or role..." 
+              <input
+                id="reports-search-bar"
+                placeholder="Search reports by candidate, ID, or role..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 style={{ 
@@ -611,7 +619,8 @@ export default function Reports() {
 
           <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
             {/* Feedback Button */}
-            <button 
+            <button
+              id="reports-btn-feedback"
               onClick={() => setShowFeedbackModal(true)}
               style={{ 
                 display: "flex", 
@@ -742,9 +751,9 @@ export default function Reports() {
               <span style={{ fontSize: 12, fontWeight: 600, color: T.navy4 }}>Status:</span>
             </div>
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-              <FilterChip label="All" active={statusFilter === "All"} onClick={() => setStatusFilter("All")} />
-              <FilterChip label="Escalated" active={statusFilter === "Escalated"} onClick={() => setStatusFilter("Escalated")} />
-              <FilterChip label="Completed" active={statusFilter === "Completed"} onClick={() => setStatusFilter("Completed")} />
+              <FilterChip label="All" chipId="reports-filter-all" active={statusFilter === "All"} onClick={() => setStatusFilter("All")} />
+              <FilterChip label="Escalated" chipId="reports-filter-escalated" active={statusFilter === "Escalated"} onClick={() => setStatusFilter("Escalated")} />
+              <FilterChip label="Completed" chipId="reports-filter-completed" active={statusFilter === "Completed"} onClick={() => setStatusFilter("Completed")} />
             </div>
             <div style={{ marginLeft: "auto", fontSize: 12, color: T.navy5 }}>
               Showing {(page - 1) * REPORTS_PAGE_SIZE + 1}–{Math.min(page * REPORTS_PAGE_SIZE, filteredReports.length)} of {filteredReports.length} reports
@@ -774,6 +783,7 @@ export default function Reports() {
               {/* Track segments */}
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                 <button
+                  id="reports-pagination-prev"
                   onClick={() => setPage(p => Math.max(1, p - 1))}
                   disabled={page <= 1}
                   style={{
@@ -793,6 +803,7 @@ export default function Reports() {
                   {Array.from({ length: totalPages }, (_, i) => i + 1).map(n => (
                     <button
                       key={n}
+                      id={`reports-pagination-page-${n}`}
                       onClick={() => setPage(n)}
                       title={`Page ${n}`}
                       style={{
@@ -814,6 +825,7 @@ export default function Reports() {
                 </div>
 
                 <button
+                  id="reports-pagination-next"
                   onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                   disabled={page >= totalPages}
                   style={{
@@ -896,7 +908,7 @@ export default function Reports() {
                 <h2 style={{ fontSize: 20, fontWeight: 800, color: T.navy0 }}>{selectedReport.candidate}</h2>
                 <div style={{ fontSize: 13, color: T.navy4 }}>{selectedReport.role}</div>
               </div>
-              <button onClick={handleCloseModal} style={{
+              <button id="reports-btn-report-modal-close" onClick={handleCloseModal} style={{
                 background: T.navy8,
                 border: "none",
                 borderRadius: 8,
@@ -992,6 +1004,7 @@ export default function Reports() {
               {/* Action Buttons */}
               <div style={{ paddingTop: 8, borderTop: `1px solid ${T.navy7}` }}>
                 <button
+                  id="reports-btn-report-modal-dismiss"
                   onClick={handleCloseModal}
                   style={{
                     width: "100%",

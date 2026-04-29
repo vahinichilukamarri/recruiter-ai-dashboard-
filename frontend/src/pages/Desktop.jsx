@@ -358,6 +358,7 @@ export default function Desktop() {
           {desktopIcons.map((icon) => (
             <div
               key={icon.id}
+              id={`desktop-icon-${icon.id}`}
               className="d-icon"
               onMouseEnter={() => setHoveredIcon(icon.id)}
               onMouseLeave={() => setHoveredIcon(null)}
@@ -478,6 +479,7 @@ export default function Desktop() {
           {taskbarItems.map((item) => (
             <div
               key={item.id}
+              id={`desktop-taskbar-${item.id}`}
               className={`taskbar-btn${item.active ? " taskbar-btn-active" : ""}${hoveredIcon === item.id ? " taskbar-btn-hovered" : ""}`}
               onMouseEnter={() => setHoveredIcon(item.id)}
               onMouseLeave={() => setHoveredIcon(null)}

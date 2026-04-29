@@ -255,6 +255,7 @@ function Sidebar({ collapsed = false, onToggle = () => {}, activeKey = "" }) {
       {/* Mobile floating opener */}
       {isMobile && !mobileOpen && (
         <button
+          id="sidebar-btn-mobile-open"
           className="sb-mobile-fab"
           onClick={() => setMobileOpen(true)}
           aria-label="Open navigation"
@@ -340,6 +341,7 @@ function Sidebar({ collapsed = false, onToggle = () => {}, activeKey = "" }) {
 
           {!isMobile && !showCollapsed && (
             <button
+              id="sidebar-btn-collapse"
               className="sb-toggle"
               onClick={onToggle}
               aria-label="Collapse sidebar"
@@ -357,6 +359,7 @@ function Sidebar({ collapsed = false, onToggle = () => {}, activeKey = "" }) {
 
           {isMobile && (
             <button
+              id="sidebar-btn-mobile-close"
               className="sb-toggle"
               onClick={() => setMobileOpen(false)}
               aria-label="Close navigation"
@@ -377,6 +380,7 @@ function Sidebar({ collapsed = false, onToggle = () => {}, activeKey = "" }) {
         {!isMobile && showCollapsed && (
           <div style={{ display: "flex", justifyContent: "center", padding: "10px 0 4px" }}>
             <button
+              id="sidebar-btn-expand"
               className="sb-toggle"
               onClick={onToggle}
               aria-label="Expand sidebar"
@@ -409,6 +413,7 @@ function Sidebar({ collapsed = false, onToggle = () => {}, activeKey = "" }) {
               item={item}
               active={isActive(item.path)}
               collapsed={showCollapsed}
+              navId={`sidebar-nav-${item.label.toLowerCase().replace(/\s+/g, "-")}`}
               onClick={() => navigate(item.path)} />
           ))}
         </nav>
@@ -450,11 +455,12 @@ function Sidebar({ collapsed = false, onToggle = () => {}, activeKey = "" }) {
 }
 
 /* ─── NAV ROW ─── */
-function NavRow({ item, active, collapsed, onClick }) {
+function NavRow({ item, active, collapsed, navId, onClick }) {
   const Icon = item.icon;
 
   return (
     <div
+      id={navId}
       className={`sb-nav-item${active ? " active" : ""}`}
       onClick={onClick}
       role="button"

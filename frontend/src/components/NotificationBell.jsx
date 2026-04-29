@@ -56,7 +56,7 @@ export default function NotificationBell() {
 
   return (
     <div ref={ref} style={{ position: "relative" }}>
-      <div onClick={() => setOpen(v => !v)} style={{ cursor: "pointer", position: "relative", display: "inline-flex" }}>
+      <div id="notification-btn-bell" onClick={() => setOpen(v => !v)} style={{ cursor: "pointer", position: "relative", display: "inline-flex" }}>
         <Bell size={20} color={T.navy3} />
         {notifications.length > 0 && (
           <div style={{ position: "absolute", top: -3, right: -3, width: 8, height: 8, borderRadius: "50%", background: T.error, border: "2px solid #fff" }} />
@@ -75,6 +75,7 @@ export default function NotificationBell() {
               Notifications{notifications.length > 0 ? ` (${notifications.length})` : ""}
             </span>
             <button
+              id="notification-btn-close"
               onClick={() => setOpen(false)}
               style={{ background: T.navy8, border: "none", borderRadius: 6, width: 26, height: 26, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
             >

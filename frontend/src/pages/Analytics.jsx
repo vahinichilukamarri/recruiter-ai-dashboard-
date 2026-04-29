@@ -286,6 +286,7 @@ export default function Analytics() {
             <div style={{ display: "flex", alignItems: "center", gap: 10, background: T.navy8, padding: "6px 14px", borderRadius: 8 }}>
               <Calendar size={14} color={T.navy4} />
               <select
+                id="analytics-filter-time-range"
                 value={timeRange}
                 onChange={e => setTimeRange(e.target.value)}
                 style={{ background: "transparent", border: "none", fontSize: 12, fontWeight: 600, color: T.navy2, outline: "none", cursor: "pointer", fontFamily: FONT }}
@@ -303,7 +304,7 @@ export default function Analytics() {
           </div>
 
           <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
-            <button style={{ display: "flex", alignItems: "center", gap: 6, background: T.white, border: `1px solid ${T.navy7}`, borderRadius: 8, padding: "8px 14px", fontSize: 12, fontWeight: 600, color: T.navy2, cursor: "pointer" }}>
+            <button id="analytics-btn-export" style={{ display: "flex", alignItems: "center", gap: 6, background: T.white, border: `1px solid ${T.navy7}`, borderRadius: 8, padding: "8px 14px", fontSize: 12, fontWeight: 600, color: T.navy2, cursor: "pointer" }}>
               <Download size={14} /> Export
             </button>
             <NotificationBell />

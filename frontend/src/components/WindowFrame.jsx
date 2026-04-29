@@ -127,13 +127,13 @@ export default function WindowFrame({ children }) {
         </div>
 
         <div className="wf-controls">
-          <button className="wf-btn wf-btn-minimize" onClick={handleMinimize} title="Minimize">
+          <button id="windowframe-btn-minimize" className="wf-btn wf-btn-minimize" onClick={handleMinimize} title="Minimize">
             <svg width="10" height="2" viewBox="0 0 10 1.5">
               <rect width="10" height="1.5" rx="0.75" fill="currentColor"/>
             </svg>
           </button>
 
-          <button className="wf-btn wf-btn-maximize" onClick={handleMaximize} title={isMaximized ? "Restore" : "Maximize"}>
+          <button id="windowframe-btn-maximize" className="wf-btn wf-btn-maximize" onClick={handleMaximize} title={isMaximized ? "Restore" : "Maximize"}>
             {isMaximized ? (
               <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
                 <rect x="3" y="0" width="8" height="8" rx="1" stroke="currentColor" strokeWidth="1.2"/>
@@ -146,7 +146,7 @@ export default function WindowFrame({ children }) {
             )}
           </button>
 
-          <button className="wf-btn wf-btn-close" onClick={handleClose} title="Close">
+          <button id="windowframe-btn-close" className="wf-btn wf-btn-close" onClick={handleClose} title="Close">
             <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
               <line x1="1" y1="1" x2="9" y2="9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
               <line x1="9" y1="1" x2="1" y2="9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>

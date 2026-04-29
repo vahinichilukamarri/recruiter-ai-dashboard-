@@ -244,8 +244,9 @@ export default function Interviews() {
           <div style={{ display: "flex", alignItems: "center", gap: 12, flex: 1 }}>
             <div style={{ position: "relative", flex: 1, maxWidth: 340 }}>
               <Search size={14} color={T.navy5} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)" }} />
-              <input 
-                placeholder="Search interviews by candidate or ID..." 
+              <input
+                id="interviews-search-bar"
+                placeholder="Search interviews by candidate or ID..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 style={{ 
@@ -331,10 +332,11 @@ export default function Interviews() {
               <Filter size={14} color={T.navy4} />
               <span style={{ fontSize: 12, fontWeight: 600, color: T.navy4 }}>Status:</span>
               {["All", "Scheduled", "In Progress", "Completed", "Escalated"].map(status => (
-                <button 
-                  key={status} 
-                  onClick={() => setStatusFilter(status)} 
-                  style={{ 
+                <button
+                  key={status}
+                  id={`interviews-filter-status-${status.toLowerCase().replace(/\s+/g, "-")}`}
+                  onClick={() => setStatusFilter(status)}
+                  style={{
                     padding: "4px 12px", 
                     borderRadius: 20, 
                     border: "none", 
@@ -427,6 +429,7 @@ export default function Interviews() {
                   <span style={{ fontSize: 12, color: T.navy5 }}>Page {page} of {totalPages}</span>
                   <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
                     <button
+                      id="interviews-pagination-prev"
                       onClick={() => setPage(p => Math.max(1, p - 1))}
                       disabled={page === 1}
                       style={{ width: 32, height: 32, borderRadius: 8, border: `1px solid ${T.navy7}`, background: T.white, cursor: page === 1 ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", opacity: page === 1 ? 0.4 : 1 }}
@@ -439,11 +442,12 @@ export default function Interviews() {
                       .map((item, idx) => item === "…" ? (
                         <span key={`e${idx}`} style={{ width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, color: T.navy4 }}>…</span>
                       ) : (
-                        <button key={item} onClick={() => setPage(item)} style={{ width: 32, height: 32, borderRadius: 8, border: item === page ? "none" : `1px solid ${T.navy7}`, background: item === page ? T.primary : T.white, color: item === page ? "#fff" : T.navy3, fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: FONT }}>
+                        <button key={item} id={`interviews-pagination-page-${item}`} onClick={() => setPage(item)} style={{ width: 32, height: 32, borderRadius: 8, border: item === page ? "none" : `1px solid ${T.navy7}`, background: item === page ? T.primary : T.white, color: item === page ? "#fff" : T.navy3, fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: FONT }}>
                           {item}
                         </button>
                       ))}
                     <button
+                      id="interviews-pagination-next"
                       onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                       disabled={page === totalPages}
                       style={{ width: 32, height: 32, borderRadius: 8, border: `1px solid ${T.navy7}`, background: T.white, cursor: page === totalPages ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", opacity: page === totalPages ? 0.4 : 1 }}
@@ -515,6 +519,7 @@ export default function Interviews() {
                   </select>
                   {dateFilter && (
                     <button
+                      id="interviews-btn-date-filter-clear"
                       onClick={() => setDateFilter("")}
                       style={{
                         padding: "4px 8px",
@@ -537,8 +542,9 @@ export default function Interviews() {
                 {filteredUpcomingInterviews.length > 0 ? (
                   filteredUpcomingInterviews.map((item, index) => (
                     <div key={`${item.role}_${item.date}`}>
-                      <div 
-                        style={{ 
+                      <div
+                        id={`interviews-upcoming-${item.role.toLowerCase().replace(/\s+/g, "-")}-${item.date}`}
+                        style={{
                           padding: "16px 20px",
                           borderBottom: `1px solid ${T.navy7}`,
                           cursor: "pointer",

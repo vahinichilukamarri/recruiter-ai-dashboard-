@@ -371,6 +371,7 @@ function CandidateTable({ candidates = CANDIDATES }) {
           <div style={{ fontSize: 12, color: T.navy4, marginTop: 2 }}>Latest evaluation results</div>
         </div>
         <button
+          id="dashboard-btn-view-all-candidates"
           onClick={() => navigate("/candidates")}
           style={{ fontSize: 12.5, fontWeight: 600, color: T.primary, cursor: "pointer", background: "transparent", border: "none", fontFamily: FONT }}
         >
@@ -520,6 +521,7 @@ export default function Dashboard() {
               <div style={{ position: "relative", flex: 1, maxWidth: 340, minWidth: 0 }}>
                 <Search size={14} color={T.navy5} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
                 <input
+                  id="dashboard-search-bar"
                   placeholder="Search candidates..."
                   style={{
                     width: "100%", paddingLeft: 36, paddingRight: 14,
